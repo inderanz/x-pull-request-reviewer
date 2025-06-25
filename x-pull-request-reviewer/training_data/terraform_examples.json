@@ -1,0 +1,22 @@
+{
+  "technology": "terraform-examples",
+  "source": "multiple",
+  "examples": [
+    {
+      "name": "AWS VPC Example",
+      "content": "\nresource \"aws_vpc\" \"main\" {\n  cidr_block           = \"10.0.0.0/16\"\n  instance_tenancy     = \"default\"\n  enable_dns_hostnames = true\n  enable_dns_support   = true\n\n  tags = {\n    Name = \"main\"\n  }\n}\n\nresource \"aws_subnet\" \"public\" {\n  vpc_id     = aws_vpc.main.id\n  cidr_block = \"10.0.1.0/24\"\n\n  tags = {\n    Name = \"public\"\n  }\n}\n",
+      "description": "Basic AWS VPC and subnet configuration"
+    },
+    {
+      "name": "Kubernetes Deployment Example",
+      "content": "\nresource \"kubernetes_deployment\" \"example\" {\n  metadata {\n    name = \"terraform-example\"\n  }\n  spec {\n    replicas = 3\n    selector {\n      match_labels = {\n        app = \"MyApp\"\n      }\n    }\n    template {\n      metadata {\n        labels = {\n          app = \"MyApp\"\n        }\n      }\n      spec {\n        container {\n          image = \"nginx:1.21.6\"\n          name  = \"example\"\n          port {\n            container_port = 80\n          }\n        }\n      }\n    }\n  }\n}\n",
+      "description": "Basic Kubernetes deployment configuration"
+    },
+    {
+      "name": "Terraform Module Example",
+      "content": "\nmodule \"vpc\" {\n  source = \"terraform-aws-modules/vpc/aws\"\n  version = \"3.0.0\"\n\n  name = \"my-vpc\"\n  cidr = \"10.0.0.0/16\"\n\n  azs             = [\"us-west-2a\", \"us-west-2b\", \"us-west-2c\"]\n  private_subnets = [\"10.0.1.0/24\", \"10.0.2.0/24\", \"10.0.3.0/24\"]\n  public_subnets  = [\"10.0.101.0/24\", \"10.0.102.0/24\", \"10.0.103.0/24\"]\n\n  enable_nat_gateway = true\n  single_nat_gateway = true\n}\n",
+      "description": "Using Terraform modules for VPC creation"
+    }
+  ],
+  "total_examples": 3
+}

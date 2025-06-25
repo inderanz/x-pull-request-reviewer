@@ -1,0 +1,823 @@
+{
+  "technology": "terraform",
+  "base_url": "https://developer.hashicorp.com/terraform/docs",
+  "pages": [
+    {
+      "url": "https://developer.hashicorp.com/terraform/docs/partnerships",
+      "title": "Terraform integration program | Terraform | HashiCorp Developer",
+      "content": "Terraform integration program\nThe Terraform Integration Program facilitates prospect partners in creating and publishing Terraform integrations validated by HashiCorp.\nTypes of Terraform Integrations\nThe Terraform ecosystem enables users to apply Terraform across different use cases and environments. The Terraform Integration Program currently supports both workflow and integration partners. Some partners can be both, depending on their use cases.\nWorkflow Partners\nbuild integrations for HCP Terraform, Terraform Enterprise, or both. Typically, these partners seek to enable customers to use their existing platform within a Terraform Run.\nInfrastructure Partners\nbuild Terraform providers (plugins) to empower customers and users to leverage Terraform to manage resources exposed by their platform APIs. These providers are accessible to users of all Terraform editions.\nOur Workflow Partners typically have the following use cases:\nCode Scanning:\nPartners that provide tooling to review IaC configurations to prevent errors or security issues.\nCost Management:\nPartners that analyze the impact of new infrastructure to cost and apply cost governance.\nObservability/Monitoring:\nPartners focused on providing visibility of performance or automatically detect infrastructure changes and ensure optimal observability in place.\nSecurity:\nPartners that detect Terraform configuration errors that do not align with security and compliance policies.\nAudit:\nPartners that help manage multi-cloud infrastructure resources to discover, prevent service disruptions, improve governance, and increase efficiency.\nNo code/low code: Partners focused on implementing, deployment and delivery of IT, Supply Chain, Operations Management, Business Management and other workflows\nSSO (Single Sign On):\nPartners focused on authentication for end users to securely sign on.\nCI/CD:\nPartners focused on continuous integration and continuous delivery/deployment.\nVCS:\nPartners focused on tracking and managing software code changes.\nMost workflow partners create\nrun tasks\nthat let them integrate their services directly into the Terraform workflow.\nRun tasks\nlet HCP Terraform execute tasks in external systems at certain points in the HCP Terraform run lifecycle. Specifically, HCP Terraform users can configure run tasks to execute during the pre-plan, post-plan and the pre-apply run stages. Refer to the\nHCP Terraform Integrations\nor\nTerraform Enterprise Integrations\ndocumentation for more details.\nMost workflow partners create run tasks that let them integrate their services directly into the Terraform workflow. Most workflow partners integrate with the Terraform workflow itself. Run tasks allow HCP Terraform to execute tasks in external systems at specific points in the HCP Terraform run lifecycle. This integration offers much more extensibility to HCP Terraform customers, enabling them to integrate your services into the HCP Terraform workflow. This feature allows users to add and execute these tasks during the pre-plan, post-plan and pre-apply stages. Eventually, we will open the third phase of this workflow to HCP Terraform users, the post-apply stage. Refer to the\nHCP Terraform Integrations\nor\nTerraform Enterprise Integrations\ndocumentation for more details.\nOur Infrastructure Partners typically have the following use cases:\nPublic Cloud:\nThese are large-scale, global cloud providers that offer a range of services including IaaS, SaaS, and PaaS.\nContainer Orchestration:\nThese partners help with container provisioning and deployment.\nIaaS (Infrastructure-as-a-Service):\nThese are infrastructure and IaaS providers that offer solutions such as storage, networking, and virtualization.\nSecurity & Authentication:\nThese are partners with authentication and security monitoring platforms.\nAsset Management:\nThese partners offer asset management of key organization and IT resources, including software licenses, hardware assets, and cloud resources.\nCI/CD:\nThese partners focus on continuous integration and continuous delivery/deployment.\nLogging & Monitoring:\nThese partners offer the capability to configure and manage services such as loggers, metric tools, and monitoring services.\nUtility:\nThese partners offer helper functionality, such as random value generation, file creation, http interactions, and time-based resources.\nCloud Automation:\nThese partners offer specialized cloud infrastructure automation management capabilities such as configuration management.\nData Management:\nThese partners focus on data center storage, backup, and recovery solutions.\nNetworking:\nThese partners integrate with network-specific hardware and virtualized products such as routing, switching, firewalls, and SD-WAN solutions.\nVCS (Version Control Systems):\nThese partners focus on VCS (Version Control System) projects, teams, and repositories from within Terraform.\nComms & Messaging:\nThese partners integrate with communication, email, and messaging platforms.\nDatabase:\nThese partners offer capabilities to provision and configure your database resources.\nPaaS (Platform-as-a-Service):\nThese are platform and PaaS providers that offer a range of hardware, software, and application development tools. This category includes smaller-scale providers and those with more specialized offerings.\nWeb Services:\nThese partners focus on web hosting, web performance, CDN and DNS services.\nInfrastructure partners integrate by building and publishing a plugin called a Terraform\nprovider\n. Providers are executable binaries written in Go that communicate with Terraform Core over an RPC interface. The provider acts as a translation layer for transactions with external APIs, such as a public cloud service (AWS, GCP, Azure), a PaaS service (Heroku), a SaaS service (DNSimple, CloudFlare), or on-prem resources (vSphere). Providers work across Terraform OSS, HCP Terraform and Terraform Enterprise. Refer to the\nTerraform Provider Integrations documentation\nfor more detail.\nTerraform Provider Integrations\nYou can follow the five steps. below to develop your provider alongside HashiCorp. This ensures that you can publish new versions with Terraform quickly and efficiently.\nPrepare\n: Develop integration using included resources\nPublish\n: Publish provider to the Registry or plugin documentation\nApply\n: Apply to Technology Partnership Program\nVerify\n: Verify integration with HashiCorp Alliances team\nSupport\n: Vendor provides ongoing maintenance and support\nWe encourage you to follow the tasks associated with each step fully to streamline the development process and minimize rework.\nAll providers integrate into and operate with Terraform exactly the same way. The table below is intended to help users understand who develops, and maintains a particular provider.\nTier\nDescription\nNamespace\nOfficial\nOfficial providers are owned and maintained by HashiCorp\nhashicorp\nPartner\nPartner providers are written, maintained, validated and published by third-party companies against their own APIs. To earn a partner provider badge the partner must participate in the\nHashiCorp Technology Partner Program\n.\nThird-party organization, e.g.\nmongodb/mongodbatlas\nCommunity\nCommunity providers are published to the Terraform Registry by individual maintainers, groups of maintainers, or other members of the Terraform community.\nMaintainer’s individual or organization account, e.g.\nDeviaVir/gsuite\nArchived\nArchived Providers are Official or Partner Providers that are no longer maintained by HashiCorp or the community. This may occur if an API is deprecated or interest was low.\nhashicorp\nor third-party\n1. Prepare\nTo get started with the Terraform provider development, we recommend reviewing and following the resources listed below.\nProvider Development Kit\na) Write your own custom provider with our\ntutorials\n.\nb) Get started with the plugin framework\nrepository\n, and reference the\ndocumentation\n.\nc) Follow the below video to create a Terraform provider with the plugin framework:\nd) Watch our overview of the new plugin framework and its improvements to the Terraform provider ecosystem:\ne) Reference our example\nHTTP provider\nf) Contribute to Terraform's\nguidelines\ng) Discuss providers in the HashiCorp developer discuss\nforum\n.\nPlease submit questions or suggestions about the provider tooling and development to the\nHashiCorp Terraform providers forum\n. If you are new to provider development and would like assistance, you can leverage one of the following development agencies that have developed Terraform providers in the past:\nPartner\nEmail\nWebsite\nCrest Data Systems\nmalhar@crestdatasys.com\nwww.crestdatasys.com\nTech Mahindra\nhashicorp@digitalonus.com\nwww.digitalonus.com\nAkava\nbd@akava.io\nwww.akava.io\nOpenCredo\nhashicorp@opencredo.com\nwww.opencredo.com\nProvider License\nAll Terraform providers listed as Partner must contain one of the following open source licenses:\nCDDL 1.0, 2.0\nCPL 1.0\nEclipse Public License (EPL) 1.0\nMPL 1.0, 1.1, 2.0\nPSL 2.0\nRuby's Licensing\nAFL 2.1, 3.0\nApache License 2.0\nArtistic License 1.0, 2.0\nApache Software License (ASL) 1.1\nBoost Software License\nBSD, BSD 3-clause, \"BSD-new\"\nCC-BY\nMicrosoft Public License (MS-PL)\nMIT\n2. Publish\nAfter your provider is complete and ready to release, you can publish it the integration to the\nTerraform Registry\n. This makes it publicly available for all Terraform users.\nFollow the\nTerraform Registry publishing documentation\nand review the\nprovider publishing learn guide\n. If your company has multiple products with separate providers, we recommend publishing them under the same Github organization to help with discoverability.\nOnce completed, your provider will be visible in the Terraform Registry and available to use in Terraform. Please confirm that everything looks correct and that documentation is rendering properly.\n3. Apply\nAfter your provider is published, connect with HashiCorp Alliances to onboard your integration to the HashiCorp technology ecosystem or\napply to become a technology partner\n.\n4. Verify\nWork with your HashiCorp Alliances representative to verify the plugin within the Registry and become listed as an HashiCorp technology partner integration on HashiCorp website.\n5. Support\nBuilding and publishing a new provider to the Terraform Registry is just the first step toward a quality Terraform integration. Integrations require consistent maintenance throughout their lifecycle.\nHashiCorp Terraform has an extremely wide community of users and contributors, and we encourage the community to report issues and help resolve them. However, we expect that all partner provider publishers continue maintaining the provider and that they address user-reported issues in a timely manner. This includes resolving all critical issues within 48 hours and all other issues within 5 business days. HashiCorp reserves the right to remove partner status from any integration that does not meet our maintenance requirements.\nIf a vendor chooses not to support their provider, the provider's tag may change to Community, rather than Partner.\nTerraform modules published by Partner: We now have the ability to tag partner published modules in the Terraform Registry. If you have a module that you want to receive the “Partner” tag, please contact\ntechnologypartners@hashicorp.com\nHCP Terraform Integrations\nRun tasks allow HCP Terraform to execute tasks in external systems at certain points in the HCP Terraform run lifecycle. Specifically, HCP Terraform users can add and execute these tasks during the pre-plan, post-plan and the pre-apply run stages. To execute a run task, HCP Terraform sends an API payload to the external system. This payload contains a collection of run-related information and a callback URL that the external system can use to send updates back to HCP Terraform.\nThe external system can then use this run information and respond back to HCP Terraform with a passed or failed status. HCP Terraform uses this status response to determine if a run should proceed, based on the task's enforcement settings within a workspace.\nPartners who successfully complete the HCP Terraform integration checklist obtain an HCP Terraform badge. This badge signifies HashiCorp validated the integration under ideal conditions and the partner is a member of the HashiCorp Technology Partner Program.\nThe above badge will help drive visibility for the partner as well as provide better differentiation for joint customers. This badge will be available for partners to use at their digital properties (as per guidelines in the technology partner guide that partners receive when they join HashiCorp’s technology partner program).\nThe HCP Terraform Integration program has the following five steps.\nEngage\n: Sign up for the Technology Partner\nProgram\nDevelop & Test\n: Understand and build using the API integration for Run Tasks\nReview\n: Review integration with HashiCorp Alliances team\nRelease\n: Provide documentation for your Integration\nSupport\n: Vendor provides ongoing maintenance and support\n1. Engage\nFor partners who are new to working with Hashicorp, we recommend\nsigning up for our Technology Partner Program\n. To understand more about the program, check out our “\nBecome a Partner\n” page.\n2. Develop and Test\nPartners should build an integration using the\nrun tasks APIs in HCP Terraform\n. To learn more about how post-plan run tasks can enhance the HCP Terraform workflow, refer to the following diagram and read our\nrun tasks announcement\n. For a more hands-on experience with run tasks follow the\nHCP Packer run tasks learn guide here\n.\nFor the run tasks API documentation\nclick here\n.\nTo better understand how pre-plan run task enhances the Terraform workflow, refer to the diagram of pre-plan tasks. For additional API resources,\nclick here\n.\n3. Review\nSchedule time with your Partner Alliance manager to review your integration. The review should include enabling the integration on the partner’s platform and HCP Terraform, explaining the use case for the integration, and a live demonstration of the functionality. If you are unable to engage with your Partner Alliances manager, you can also reach out to\ntechnologypartners@hashicorp.com\n.\n4. Release\nWe add new partners to the\nTerraform Run Task page\nafter the integration review and documentation is complete. On this page, you will provide a two-line summary about your integration(s). If you have multiple integrations, we highly recommend creating a summary that highlights all potential integration options.\nYou must provide documentation that helps users get started with your integration. You also need to provide documentation for our support team, including points of contact, email address, FAQ and/or best practices. We want to ensure end users are able to reach the right contacts for internal HashiCorp support when working with customers.\n5. Support\nAt HashiCorp, we view the release step to be the beginning of the journey. Getting the integration built is just the first step in enabling users to leverage it against their infrastructure. On-going effort is required to support and maintain it after you complete the initial development.\nWe expect that partners will create a mechanism to track and resolve all critical issues as soon as possible (ideally within 48 hours) and all other issues within 5 business days. This is a requirement given the critical nature of HCP Terraform to a customer’s operation. If you choose not to support your integration, we cannot consider it verified and will not list it on the Terraform documentation website.\nTerraform Enterprise Integrations\nTerraform Enterprise integrations are workflow integrations that are validated against Terraform Enterprise. Partners with a verified Terraform Enterprise integration will be given a Terraform Enterprise verified badge. This signifies HashiCorp has verified the integration and the partner is a member of the HashiCorp Technology Partner Program. At this time we are working to release an official program around integrating with Terraform Enterprise. Until then, if you are interested in publishing a verified Terraform Enterprise integration, please reach out to us at\ntechnologypartners@hashicorp.com\n.\nContact us at\ntechnologypartners@hashicorp.com\nwith any questions or feedback.\nUpon successfully building a run task integration with HCP Terraform, partners can contact their alliance manager to validate it against Terraform Enterprise. Customers commonly deploy Terraform Enterprise in a private cloud or in an air-gapped environment, in which case partners need to ensure that their product can communicate bi-directionally with Terraform Enterprise inside the customer’s network.\nEdit this page on GitHub",
+      "code_examples": [
+        {
+          "language": "",
+          "code": "mongodb/mongodbatlas",
+          "element": "<code><span>mongodb/mongodbatlas</span></code>"
+        },
+        {
+          "language": "",
+          "code": "DeviaVir/gsuite",
+          "element": "<code>DeviaVir/gsuite</code>"
+        }
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Terraform integration program",
+          "id": "terraform-integration-program"
+        },
+        {
+          "level": 2,
+          "text": "Documentation",
+          "id": "sidebar-label"
+        },
+        {
+          "level": 2,
+          "text": "Types of Terraform Integrations",
+          "id": "types-of-terraform-integrations"
+        },
+        {
+          "level": 2,
+          "text": "Terraform Provider Integrations",
+          "id": "terraform-provider-integrations"
+        },
+        {
+          "level": 2,
+          "text": "HCP Terraform Integrations",
+          "id": "hcp-terraform-integrations"
+        },
+        {
+          "level": 2,
+          "text": "Terraform Enterprise Integrations",
+          "id": "terraform-enterprise-integrations"
+        },
+        {
+          "level": 3,
+          "text": "Resources",
+          "id": ""
+        },
+        {
+          "level": 3,
+          "text": "1. Prepare",
+          "id": "1-prepare"
+        },
+        {
+          "level": 3,
+          "text": "2. Publish",
+          "id": "2-publish"
+        },
+        {
+          "level": 3,
+          "text": "3. Apply",
+          "id": "3-apply"
+        },
+        {
+          "level": 3,
+          "text": "4. Verify",
+          "id": "4-verify"
+        },
+        {
+          "level": 3,
+          "text": "5. Support",
+          "id": "5-support"
+        },
+        {
+          "level": 3,
+          "text": "1. Engage",
+          "id": "1-engage"
+        },
+        {
+          "level": 3,
+          "text": "2. Develop and Test",
+          "id": "2-develop-and-test"
+        },
+        {
+          "level": 3,
+          "text": "3. Review",
+          "id": "3-review"
+        },
+        {
+          "level": 3,
+          "text": "4. Release",
+          "id": "4-release"
+        },
+        {
+          "level": 3,
+          "text": "5. Support",
+          "id": "5-support-1"
+        },
+        {
+          "level": 4,
+          "text": "Provider Development Kit",
+          "id": "provider-development-kit"
+        },
+        {
+          "level": 4,
+          "text": "Provider License",
+          "id": "provider-license"
+        }
+      ],
+      "timestamp": 1750757547.9510899
+    },
+    {
+      "url": "https://developer.hashicorp.com/terraform/docs/glossary",
+      "title": "Terraform glossary | Terraform | HashiCorp Developer",
+      "content": "Terraform glossary\nThis page collects brief definitions of some of the technical terms used in the documentation for Terraform, as well as some terms that come up frequently in conversations throughout the Terraform community.\nAPI\nApply (noun)\nApply (verb)\nArgument\nAttribute\nBackend\nBlob Storage\nBlock\nBranch\nCI/CD\nCLI\nCommit\n(Terraform) Configuration\nConfiguration Version\nCost Estimation\nData Source\nDeposed\nExpression\nFork\nGit\nHCL\nID\nInfrastructure as Code\nIngress\nInput Variables\nInterpolation\nJSON\nLocking\nLog\nModule\nOAuth\nOAuth Client\nOAuth Token\nOrganization\nOutput Values\nOSS\nPermissions\nPlan (verb)\nPlan (noun, 1)\nPlan File\nPolicy\nPolicy Check\nPolicy Set\nPrivate Terraform Registry\nPrivate Terraform Enterprise (PTFE)\n(Terraform) Provider\nPull Request (PR)\nQueue\n(Terraform) Registry\nRemote Operations\nRemote Backend\nRepository\nResource\nRoot Module\nRoot Outputs\nRun\nRun Triggers\nS3\nSAML\nSentinel\nSite Admin\nSpeculative Plan\nSSH Key\nState\nState Version\nTeam\nTerraform\nHCP Terraform\nTerraform Enterprise\nTerraform Version\nTFE\nTFE Provider / HCP Terraform Provider\n(API) Token\nTrigger\nVariables\nVCS\nVCS Provider\nWebhook\nWorking Directory\nWorkspace\nAPI\nAcronym for \"Application Programming Interface\". Any interface designed to allow programmatic manipulation of some kind of software system. For most software developers today, the most common kinds of APIs are based on HTTP requests.\nTerraform relies on cloud service provider APIs to manage resources; each service's Terraform provider is responsible for mapping Terraform's resource model to the series of actual API calls necessary to create, check, modify, or delete a real infrastructure resource in that cloud service.\nHCP Terraform also offers its own API, for managing resources like team membership, policies, and workspaces. That API, in turn, is used by the\ntfe\nTerraform provider, so you can use Terraform to manage the system that runs Terraform for you.\nHCP Terraform: API\nTerraform providers:\ntfe\nApply (noun)\nOne of the stages of a\nrun\n, in which changes are made to real infrastructure resources in order to make them match their desired state. The counterpart of a\nplan\n.\nIn Terraform's CLI, applies are performed with the\nterraform apply\ncommand. HCP Terraform runs\nterraform apply\nusing a\nplan file\nas its input.\nTerraform: The\nterraform apply\ncommand\nHCP Terraform: About Runs\nApply (verb)\nTo make changes to real infrastructure in order to make it match the desired state (as specified by a Terraform\nconfig\nand set of\nvariables\n).\nIn conversation, it's common to refer to \"applying a\nplan\n\" (usually in the context of HCP Terraform's workflow) or \"applying a\nconfiguration\n\" (usually in the context of the Terraform CLI workflow).\nTerraform: The\nterraform apply\ncommand\nHCP Terraform: About Runs\nArgument\nIn Terraform's\nconfiguration\nlanguage: a syntax construct that assigns a value to a name. Arguments have the form\n<IDENTIFIER> = <EXPRESSION>\n, and they appear within blocks.\nMost of a Terraform configuration consists of using arguments to configure Terraform\nresources\n. Each resource type defines the arguments its resources can use, the allowed values for each argument, and which arguments are required or optional. Information about a given resource type can be found in the docs for that resource's\nprovider\n.\nTerraform Language docs: Syntax — Arguments and Blocks\nAttribute\nIn Terraform's\nconfiguration\nlanguage: a named piece of data that belongs to some kind of object. The value of an attribute can be referenced in\nexpressions\nusing a dot-separated notation, like\naws_instance.example.id\n.\nTerraform\nresources\nand\ndata sources\nmake all of their\narguments\navailable as readable attributes, and also typically export additional read-only attributes.\nTerraform docs: Expressions — Indices and Attributes\nBackend\nThe part of Terraform's core that determines how Terraform stores\nstate\nand performs\noperations\n(like\nplan\n,\napply\n, import, etc.). Terraform has multiple backends to choose from, which can be configured in a variety of ways. Backends are not plugins, so it is not possible to install additional backends.\nIn a general computer science sense, a backend is any lower-level implementation that enables a higher-level feature. But in the context of Terraform, \"backend\" always means the built-in code that handles state and operations.\nTerraform docs: Backends\nBlob Storage\nThe blob storage API service for HCP Terraform stores and retrieves arbitrary chunks of data using opaque addresses. The opaque addresses are then indexed by a directory of some kind. The most notable example is AWS's\nS3\n.\nYou do not need to be familiar with the properties and advantages of blob storage services in order to work with Terraform or HCP Terraform. However, you might need to administer or configure a blob storage service if you are responsible for administering a\nTerraform Enterprise\ninstance.\nBlock\nIn Terraform's\nconfiguration\nlanguage: a container for other content which usually represents the configuration of some kind of object, like a\nresource\n. Blocks have a\nblock type,\ncan have zero or more\nlabels,\nand have a\nbody\nthat contains any number of\narguments\nand nested blocks. Most of Terraform's features are controlled by top-level blocks in a configuration file.\nresource\n\"aws_vpc\"\n\"main\"\n{\ncidr_block\n=\nvar.base_cidr_block\n}\n<\nBLOCK\nTYPE\n>\n\"<BLOCK LABEL>\"\n\"<BLOCK LABEL>\"\n{\n# Block body\n<\nIDENTIFIER\n>\n=\n<\nEXPRESSION\n>\n# Argument\n}\nTerraform Language docs: Syntax — Arguments and Blocks\nBranch\nIn some\nversion control systems\n: a semi-independent history of changes to content in a repository. A branch generally shares some history with other branches in the same repository, but eventually diverges to include changes that aren't yet present elsewhere.\nA repository usually has a default branch (whose name, in\nGit\n, defaults to\nmaster\n), which successful changes are eventually merged into. Most modern development workflows also include topic branches (where a specific set of changes is explored, iterated on, and verified), and some workflows include long-lived branches other than the default branch.\nCI/CD\nCI/CD (Continuous Integration/Continuous Delivery) platforms perform pre-defined tasks (like tests or builds) in response to trigger events (like new commits in a project). This helps make new releases more automated, predictable, and understandable. Infrastructure management, typically handled by operations teams, can also fit into an automated release workflow using infrastructure as code with Terraform.\nCLI\nCommand-line interface. The\nterraform\ncommand expects to be run in a CLI (a Unix shell or the Windows command prompt), which it uses to accept instructions and return text output.\nWe often use \"Terraform CLI\" to refer to the core Terraform Community edition binary when we need to distinguish it from other parts of the Terraform ecosystem (like HCP Terraform or the Terraform GitHub Actions).\nWikipedia: Command-line Interface\nTerraform docs: Commands (CLI)\nCommit\nIn a\nversion control system\n: A coherent set of changes saved to a repository's version history.\nIn Git, commits act like a complete snapshot of the contents of a repo, on a specific\nbranch\n(or group of branches with shared history) and at a specific moment in time. Each commit also records the identity of its parent(s), which enables viewing the entire history of the repo up to any specific moment. Additionally, comparing a commit to its parent(s) can reveal the exact changes introduced by that commit; if those changes are applied as a diff, they can be added to a different branch in the repo without merging in the entire history of the commit in question.\n(Terraform) Configuration\nAlso \"config\".\nCode written in\nTerraform's configuration language\nthat declaratively describes the desired state of your infrastructure. A complete config consists of a\nroot module\n, which can optionally call any number of child\nmodules\n.\nTerraform docs: Configuration Language\nIntroduction to Terraform\nConfiguration Version\nHCP Terraform\nAlso \"config version\".\nThe contents of a Terraform\nconfig\nat a specific moment in time. This concept only applies to HCP Terraform, since the Terraform CLI doesn't have visibility into repeated runs for a specific configuration over a period of time.\nEvery stage of a given run uses one specific configuration version.\nConfig versions can be automatically imported when new commits are merged to a workspace's repo, uploaded via the API, or uploaded by running\nterraform plan\nor\nterraform apply\nas a\nremote operation\n. Adding a new config version is sometimes called \"\ningressing\n.\"\nCost Estimation\nHCP Terraform\nPart of a\nrun\n. After gathering the\nplan file\nfor a run, HCP Terraform uses plan data to estimate costs for each resource found in the\nplan\n. Previous and proposed resources are given estimated costs, providing an estimated delta cost between the two. The results can be used in\nSentinel policies\n.\nHCP Terraform docs: Run States and Stages\nData Source\nA\nresource\n-like object that can be configured in Terraform's\nconfiguration\nlanguage.\nUnlike resources, data sources do not create or manage infrastructure. Instead, they return information about some kind of external object in the form of readable\nattributes\n. This allows a Terraform configuration to make use of information defined outside of Terraform, or defined by another separate Terraform configuration.\nData sources are implemented by\nproviders\n.\nTerraform docs: Data Sources\nDeposed\nThis status tracks a\nresource\nthat was marked for deletion, but still remains in the Terraform\nstate\nand infrastructure due an error from a previous\napply\n. Terraform expected to replace the existing resource by creating a new resource, then destroying the existing resource, but an error occurred in the apply before the destruction. Existing references to the resource refer to the new resource. Terraform will destroy the\ndeposed\nresource on the next apply. This only can occur in resource\nconfigurations\nthat have the\nlifecycle\nconfiguration block\ncreate_before_destroy\nargument\nset to\ntrue\n.\nTerraform docs: Resources\nExpression\nIn Terraform's\nconfiguration\nlanguage: a piece of syntax that represents a value, either literally or by referencing and combining other values. Expressions appear as values for\narguments\n, or within other expressions.\nPrior to Terraform 0.12,\n[\ninterpolation]\n[\n] was the only way to use non-literal expressions in Terraform configurations; in 0.12 and later, expressions can be used independently.\nTerraform docs: Expressions\nFork\nAlso \"forked repository\" or \"forked repo\".\nA\nVCS\nrepository\nthat was created by copying content and history from another repository.\nDifferent VCS providers handle forks differently, but a fork is usually owned by a different person or organization than the original repo, and a fork usually does not inherit all of the original repo's access permissions.\nHCP Terraform makes extensive use of VCS repos, and assumes that forks of a trusted repo are not necessarily trusted. As such, HCP Terraform avoids evaluating any code from external forks, which prevents HCP Terraform from running\nspeculative plans\nfor\npull requests\nfrom forks.\nOn\nTerraform Enterprise\n,\nspeculative plans\non\npull requests\nfrom forks can be enabled by an administrator.\nGit\nA distributed\nversion control system\nfor tracking changes in source code during software development. It is designed for coordinating work among programmers, but it can be used to track changes in any set of files.\nWikipedia: Git\nHCL\nHashiCorp Configuration Language. The structured configuration syntax that serves as the basis for Terraform's\nconfiguration\nlanguage, as well as the configuration layer for several other HashiCorp products.\nHCL establishes the syntax Terraform uses for things like\narguments\n,\nblocks\n, literal values, and\nexpressions\n. But what most people think of as the Terraform language extends beyond just the syntax; the built-in functions, Terraform-specific block types (like\nresource\nand\nvariable\n), and Terraform-specific named values available in expressions are all implementation details of Terraform itself.\nGitHub: HCL\nTerraform docs: Configuration Language\nID\nAn identifier; an opaque string permanently associated with a specific object, which doesn't contain any information about the object but which can be used to retrieve information about it or perform actions on it via an\nAPI\n.\nIn Terraform, many\nresource\ntypes have an ID\nattribute\nthat helps link Terraform's\nstate\nto the real infrastructure resource being managed.\nIn HCP Terraform, most internal application objects (like\nworkspaces\n, users,\npolicies\n, etc.) can be identified by both a name and by an opaque, permanent ID. Most API endpoints use IDs instead of names, since names sometimes change. IDs for HCP Terraform's application objects are sometimes called \"external IDs.\"\nYou can usually copy an external ID from the URL bar when viewing an object in HCP Terraform's UI. Workspaces don't display an ID in the URL bar, but their general settings page includes a UI control for viewing and copying the ID.\nInfrastructure as Code\nInfrastructure-as-Code (IaC) is the practice of managing infrastructure in a file or files rather than manually configuring it via a user interface. Infrastructure resource types managed with IaC can include virtual machines, security groups, network interfaces, and many others.\nIngress\nHCP Terraform\nThe process of bringing content into HCP Terraform. Usually that content is a\nconfiguration version\n, but it can also be a\nprivate module\nversion or some other kind of content.\nThis term comes from HCP Terraform's internal subsystems. Most documentation and UI avoids using \"ingress,\" but it can sometimes appear in API contexts or support conversations.\nInput Variables\nSee\nVariables\n.\nInterpolation\nUsing a special placeholder to insert a computed value into a string.\nTerraform's configuration language\nsupports interpolation in strings using\n${<EXPRESSION>}\nplaceholders. For example:\n\"Hello,\n${\nvar\n.\nname\n}\n!\"\nPrior to Terraform 0.12, interpolation was the only way to use non-literal\nexpressions\nin Terraform configurations; in 0.12 and later, expressions can be used independently.\nInterpolation is a very common feature in programming languages; for example, Ruby uses\n#{<EXPRESSION>}\nplaceholders in double-quoted strings, and JavaScript (ES6 and up) uses\n${<EXPRESSION>}\nplaceholders in backtick-quoted strings.\nTerraform docs: Expressions - String Templates\nJSON\nAcronym for \"JavaScript Object Notation\". A popular text-based data interchange format, which can represent strings, numbers, booleans, null, arrays, and objects/maps.\nTerraform and HCP Terraform often interact with JSON data in order to consume or provide APIs. Terraform also supports JSON as an alternate format for\nconfigurations\n.\nWikipedia: JSON\nTerraform docs: JSON Configuration Syntax\nLocking\nHCP Terraform\nThe ability to prevent new\nruns\nfrom starting in a given\nworkspace\n. Workspaces are automatically locked while a run is in progress, and can also be manually locked.\nThe\nremote\nbackend\nrespects the lock status in HCP Terraform workspaces. Some other Terraform\nbackends\ncan also lock state during runs.\nLog\nThe text-based output of actions taken within a\nrun\n. For example, the output of running\nterraform plan\n.\nModule\nAlso \"Terraform module\".\nA self-contained collection of Terraform\nconfigurations\nthat manages a collection of related infrastructure resources.\nOther Terraform configurations can\ncall\na module, which tells Terraform to manage any resources described by that module.\nModules define\ninput variables\n(which the calling module can set values for) and\noutput values\n(which the calling module can reference in\nexpressions\n).\nTerraform docs: Modules\nOAuth\nAn open standard for token-based authorization between applications on the internet.\nHCP Terraform uses OAuth to connect your organization to your\nVCS provider\n. Generally takes an\nid\nand\nsecret\nfrom your VCS provider to give access to HCP Terraform and allow it to pull in configuration from the provider.\nHCP Terraform docs: VCS Integration\nOAuth Client\nHCP Terraform\nAn entity collecting the configuration information that an HCP Terraform organization needs in order to connect to a specific\nVCS provider\n.\nAn OAuth client needs an\nOAuth token\nin order to actually access data belonging to a user or organization in that VCS provider. The client can be created with an existing token for that VCS provider (API-only, and not supported for some VCS providers), or it can be created with the details HCP Terraform needs in order to request a token. Requesting a token requires a user to click through and approve access with their VCS provider account.\nHCP Terraform docs: VCS Integration\nHCP Terraform API docs: OAuth Clients\nOAuth Token\nIn general:\nA secret string that allows an application to authenticate itself to another application. The token is generated ahead of time by the application being accessed (either during the OAuth authorization exchange or in response to a direct request by a user), and allows access with whatever permissions that application assigns to the token. The\nVCS providers\nsupported by HCP Terraform allow access via OAuth tokens; that access is generally restricted to data belonging to a given user or organization within that provider.\nWithin HCP Terraform:\nAn entity in the HCP Terraform application that associates an OAuth token (in the \"secret string\" sense) with a permanent ID and with metadata about which VCS provider it applies to and which VCS user approved the token. When documentation refers specifically to this kind of entity, the name is often styled as\noauth-token\nto indicate that it's an entity you can interact with via the\nAPI\n.\nAn\noauth-token\nhas a one-to-one relationship with an\nOAuth client\n, but the client can outlive a specific token, to allow revoking and re-requesting VCS access.\nWorkspaces\nthat are linked to a VCS\nrepo\nhave a relationship with one\noauth-token\n.\nHCP Terraform docs: VCS Integration\nHCP Terraform API docs: OAuth Tokens\nOrganization\nHCP Terraform\nHCP Terraform's fundamental unit for controlling access and grouping things together; meant to represent a company or a business unit within a company. An organization contains a group of\nworkspaces\n, a group of\nteams\n, a group of\nSentinel policies\n, and a variety of settings. Adding users to an organization is done via teams.\nHCP Terraform docs: Organizations\nOutput Values\nAlso \"outputs\".\nData exported by a Terraform\nmodule\n, which can be displayed to a user and/or programmatically used by other Terraform code.\nOSS\nAcronym for \"Open-Source Software\". Publicly available Terraform providers are open-source.\nTerraform and all other HashiCorp products are accessible through a source-available license that allows broad copying, modification, and redistribution. HCP Terraform and Terraform Enterprise are closed-source commercial software, that make use of Terraform and the available Terraform providers.\nWikipedia: Open-Source Software\nPermissions\nHCP Terraform\nSpecific levels of access allowed within HCP Terraform. Can be managed at the\nworkspace\nand/or\norganization\nlevel. For example, a user with \"read\" permissions for a workspace can see a list of runs but cannot approve a run like a user with \"write\" permissions can.\nHCP Terraform docs: Permissions\nPlan (verb)\nAlso \"queue plan\".\nTo start a new\nrun\n, which begins by running a Terraform\nplan (noun)\n.\nHCP Terraform docs: About Runs\nPlan (noun, 1)\nOne of the stages of a\nrun\n, in which Terraform compares the managed infrastructure's real state to the\nconfiguration\nand\nvariables\n, determines which changes are necessary to make the real state match the desired state, and presents a human-readable summary to the user. The counterpart of an\napply\n.\nIn Terraform's CLI, plans are performed by all of the following commands:\nterraform plan\n, which only performs a plan. It can optionally output a\nplan file\n, which\nterraform apply\ncan use to perform that exact set of planned changes.\nterraform apply\n, which performs a plan and then, if a user approves, immediately applies it.\nterraform destroy\n, which is similar to\nterraform apply\nbut uses a desired state in which none of the managed resources exist; if the plan is approved, those resources are destroyed.\nIn HCP Terraform, plans are performed by committing changes to a workspace's configuration, running\nterraform plan\nor\nterraform apply\nwith the remote backend enabled, manually queueing a plan, or uploading a configuration via the API.\nHCP Terraform's workflow always creates a\nplan file\n, which can be auto-applied or can wait for a user's approval. HCP Terraform also supports\nspeculative plans\n, which are for informational purposes only and cannot be applied.\nTerraform docs: The\nterraform plan\ncommand\nHCP Terraform docs: About Runs\nPlan File\nAlso \"\n.tfplan\n\", \"saved plan\", or simply \"plan\" in contexts where it's clearly referring to an artifact.\nA binary artifact optionally produced by the\nterraform plan\ncommand, which\nterraform apply\ncan use to carry out the exact changes that were decided at the time of the\nplan\n.\nHCP Terraform always uses a saved plan as the input to an\napply\n, so that applies never make changes that weren't shown to the user after the plan (in cases where the config or the variables changed in the meantime).\nPolicy\nHCP Terraform\nSentinel\ncode that can be enforced on runs. Combined into\npolicy sets\n.\nHCP Terraform docs: Managing Sentinel Policies\nPolicy Check\nHCP Terraform\nPart of a\nrun\n. After gathering the\nconfiguration\n,\nstate\n, and\nplan file\nfor a run, HCP Terraform runs\nSentinel\nto check that data against the active\npolicies\n. Policy checks end in success or failure. If a failure occurs in a required policy, this can prevent the run from proceeding to the\napply\nstage.\nHCP Terraform docs: Run States and Stages\nPolicy Set\nHCP Terraform\nA list of\nSentinel\npolicies\nto enforce globally or on specific workspaces.\nHCP Terraform docs: Managing Sentinel Policies\nPrivate Terraform Registry\nHCP Terraform\nAlso \"private module registry\".\nA version of the\nTerraform Registry\nthat is built-in to HCP Terraform, to enable code sharing within an organization. It includes a configuration designer, which lets you combine and configure modules to generate a Terraform\nconfiguration\nthat uses them.\nHCP Terraform docs: Private Registry\nPrivate Terraform Enterprise (PTFE)\nTerraform Enterprise\n.\nIn April 2024, we renamed Terraform Cloud as HCP Terraform. Terraform Enterprise is the self-managed distribution of HCP Terraform.\nTerraform Enterprise docs\n(Terraform) Provider\nA plugin for Terraform that makes a collection of related resources available. A provider plugin is responsible for understanding\nAPI\ninteractions with some kind of service and exposing\nresources\nbased on that API.\nTerraform providers are generally tied to a specific\ninfrastructure provider,\nwhich might be an infrastructure as a service (IaaS) provider (like AWS, GCP, Microsoft Azure, OpenStack), a platform as a service (PaaS) provider (like Heroku), or a software as a service (SaaS) provider (like HCP Terraform, DNSimple, Cloudflare).\nThere are many existing providers available, but providers can also be custom-built to work with any API.\nTerraform docs: Provider Use\nTerraform docs: Plugin Development\nPull Request (PR)\nA mechanism created by GitHub to review and discuss changes made to a\nGit\nrepository\nbranch\nthat a user wants to merge into another branch. Other collaborators can request changes, approve, or reject these changes.\nConversationally, people often say \"pull request\" to refer to this review-before-merging workflow even when working with a VCS provider that calls it something else. (For example, GitLab calls this a Merge Request.)\nQueue\nHCP Terraform\nThe list of\nruns\nwaiting to be processed. HCP Terraform uses several queues of runs, including a per-workspace queue (since only one run at a time is allowed in a given\nworkspace\n, to avoid conflicts and state corruption) and a global per-instance queue (since compute resources are finite and HCP Terraform only has access to so many VMs).\n(Terraform) Registry\nA repository of\nmodules\nwritten by the Terraform community, which can be used as-is within a Terraform\nconfiguration\nor\nforked\nand modified. The registry can help you get started with Terraform more quickly, see examples of how Terraform is written, and find pre-made modules for infrastructure components you require.\nTerraform docs: The Terraform Registry\nRemote Operations\nHCP Terraform\nThe ability to start a\nrun\n(or perform a few other tasks) from your local\nCLI\nand view output inline, while still allowing HCP Terraform to perform the actual operation.\nHCP Terraform performs Terraform runs in its own disposable VMs, where it can capture information, control access to secrets, etc., but many users are accustomed to running Terraform on their local machines. Remote operations exist to help split the difference.\nHCP Terraform Docs: Terraform Runs and Remote Operations\nRemote Backend\nA Terraform CLI feature that lets Terraform connect to HCP Terraform, by specifying in the Terraform\nconfiguration\nwhich organization and workspace(s) to use. Used for\nremote operations\nin HCP Terraform workspaces, and used for\nstate\nstorage in HCP Terraform's free edition.\nSee also\nbackend\n. Older documentation sometimes refers to backends like\ns3\nor\nconsul\nas \"remote backends,\" since they store Terraform's state in a remote service instead of the local filesystem, but today this term usually means the specific backend whose name is\nremote\n.\nTerraform docs: The\nremote\nBackend\nRepository\nAlso \"repo\".\nA collection of files and a history of the changes to them, managed by a\nversion control system\n. In HCP Terraform, a \"repo\" is generally a Git repository that contains a Terraform configuration, although\nprivate modules\nare also based on Git repos.\nWikipedia: Repository (version control)\nResource\nAlso \"infrastructure resource\".\nIn Terraform's\nconfiguration\nlanguage: A\nblock\nthat describes one or more infrastructure objects. Resources can be things like virtual networks, compute instances, or higher-level components such as DNS records.\nIn other Terraform-related contexts: An infrastructure object of a type that\ncould\nbe managed by Terraform.\nA resource block in a configuration instructs Terraform to\nmanage\nthe described resource — during a run, Terraform will create a matching real infrastructure object if one doesn't already exist, and will modify the existing object if it doesn't match the desired configuration. Terraform uses\nstate\nto keep track of which real infrastructure objects correspond to resources in a configuration.\nTerraform uses cloud provider\nAPIs\nto create, edit, and destroy resources. Terraform\nproviders\nare responsible for defining resource types and mapping transitions in a resource's state to a specific series of API calls that will carry out the necessary changes.\nTerraform docs: Resources\nRoot Module\nThe place where Terraform begins evaluating a\nconfiguration\n. The root module consists of all of the configuration files in Terraform's\nworking directory\n.\nThe root module's\nvariables\nand\noutputs\nare handled directly by Terraform (unlike child\nmodules\n, whose variables and outputs are handled by the calling module). Root variable values can be provided with HCP Terraform,\n.tfvars\nfiles, CLI options, or environment variables. Root outputs are printed after a run and stored in the state.\nRoot Outputs\nAlso \"root-level outputs\".\nThe\noutput values\nof a configuration's\nroot module\n. A\nconfiguration\ncan access the root outputs of another configuration with a\nterraform_remote_state\ndata source.\nRun\nAlso \"Terraform Run\".\nThe process of using Terraform to make real infrastructure match the desired state (as specified by the contents of the config and variables at a specific moment in time).\nIn HCP Terraform, runs are performed in a series of stages (\nplan\n,\npolicy check\n, and\napply\n), though not every stage occurs in every run. HCP Terraform saves information about historical runs.\nLearn Terraform: Get Started\nHCP Terraform docs: About Runs\nRun Triggers\nHCP Terraform\nHCP Terraform provides a way to connect a given workspace to one or more workspaces within an organization, known as \"source workspaces\". These connections, called run triggers, allow runs to queue automatically in your workspace on successful apply of runs in any of the source workspaces.\nHCP Terraform docs: Runs Triggers\nS3\nAmazon Web Services' \"Simple Storage Service\", a service for storing and retrieving arbitrary blobs of data.\nMany other cloud or self-hosted services provide\nAPIs\nthat are compatible with S3's API, which allows them to be used with software that was designed to work with S3.\nTerraform's\naws\nprovider\ncan manage S3 resources.\nTerraform Enterprise can use an S3-compatible\nblob storage\nservice when configured to use\nExternal Services\nfor storage.\nAWS: S3\nSAML\nTerraform Enterprise\nSAML is an XML-based standard for authentication and authorization. Terraform Enterprise can act as a service provider (SP) (or Relying Party, RP) with your internal SAML identity provider (IdP). The SAML Single Sign On feature is only available on\nTerraform Enterprise\n; the HCP Terraform SaaS does not support it.\nTerraform Enterprise docs: SAML Single Sign-On\nSentinel\nHCP Terraform\nA language and runtime for managing policy as code. Allows you to define rules around operations in HCP Terraform.\nHCP Terraform docs: Sentinel\nSite Admin\nTerraform Enterprise\nAn administrator of a\nTerraform Enterprise\ninstance, who has access to application settings that affect all\norganizations\nusing the instance.\nTerraform Enterprise docs: Administration\nSpeculative Plan\nHCP Terraform\nA\nrun\nthat is only intended to show possible changes to infrastructure, when using a given\nconfig version\nand set of\nvariables\n. Speculative plans can never be\napplied\n, and are usually started as a result of\npull requests\nto a\nworkspace\n's repo, or by running\nterraform plan\non the command line with\nremote operations\nconfigured.\nSSH Key\nA type of access credential based on public key cryptography, used to log into servers.\nHCP Terraform uses SSH private keys for two kinds of operations:\nDownloading private Terraform\nmodules\nwith\nGit\n-based sources during a Terraform run. Keys for downloading modules are assigned per-workspace.\nBringing content from a connected\nVCS provider\ninto HCP Terraform, usually when pulling in a Terraform\nconfiguration\nfor a\nworkspace\nor importing a module into the\nprivate module registry\n. Only some VCS providers require an SSH key, but other providers only need an SSH key if your repositories include submodules that are only accessible via SSH (instead of your VCS provider's API).\nWikipedia: SSH\nHCP Terraform docs: SSH Keys for Cloning Modules\nState\nTerraform's cached information about your managed infrastructure and\nconfiguration\n. This state is used to persistently map the same real world\nresources\nto your configuration from run-to-run, keep track of metadata, and improve performance for large infrastructures.\nWithout state, Terraform has no way to identify the real resources it created during previous runs. Thus, when multiple people are collaborating on shared infrastructure, it's important to store state in a shared location, like a free HCP Terraform organization.\nTerraform docs: State\nState Version\nHCP Terraform\nA snapshot of your infrastructure's\nstate\nat a point in time. Can be manually uploaded to HCP Terraform or created as the result of an\napply\n.\nTerraform CLI doesn't have any concept of historical state data; it only interacts with the most recent state, and writes a snapshot of the new state to the configured\nbackend\nafter making changes. Whatever system that backend writes to can choose to retain previous state; HCP Terraform does this, and some other backends (like S3) can also be configured to keep historical snapshots. The\nlocal\nbackend does not.\nTeam\nHCP Terraform\nA group of HCP Terraform users, which can be given permission to access and/or edit various objects (\nworkspaces\n,\npolicies\n, etc.) within an\norganization\n. A team belongs to a single organization. Users can belong to any number of teams in any number of organizations.\nHCP Terraform docs: Teams\nTerraform\nA tool for building, changing, and versioning infrastructure safely and efficiently. Terraform can manage existing and popular service providers as well as custom in-house solutions.\nIntro to Terraform\nHCP Terraform\nAn application that helps teams use Terraform together. HCP Terraform provides a consistent environment for Terraform runs, as well as hosting Terraform\nstate\nand other shared information.\nHCP Terraform is available as a hosted service at\nhttps://app.terraform.io\n. It is also available in an on-premises distribution called\nTerraform Enterprise\n.\nPrior to 2024, HCP Terraform was previously referred to as \"Terraform Cloud\". Prior to 2019, \"Terraform Enterprise\" (TFE) was the name of Terraform's cloud application (now HCP Terraform), and \"Private Terraform Enterprise\" (PTFE) was the name of the on-premises distribution.\nHCP Terraform docs\nTerraform Enterprise\nAn on-premises distribution of HCP Terraform, which enables large enterprises to host their own private instance of the application.\nPrior to 2019, \"Terraform Enterprise\" (TFE) was the name of Terraform's cloud application (now HCP Terraform), and \"Private Terraform Enterprise\" (PTFE) was the name of the on-premises distribution. Prior to 2024, HCP Terraform was previously referred to as \"Terraform Cloud\".\nTerraform Enterprise docs\nTerraform Version\nHCP Terraform\nA particular version of the\nterraform\nbinary available for use in HCP Terraform workspaces. Specifies a URL, a SHA256 checksum and enabled/beta flags.\nSite admins\ncan configure the available Terraform versions for a\nTerraform Enterprise\ninstance.\nTerraform Enterprise docs: Managing Terraform Versions\nTFE\nTerraform Enterprise\n.\nTerraform Enterprise docs\nTFE Provider / HCP Terraform Provider\nA Terraform provider that manages HCP Terraform. Allows you to manage HCP Terraform using a Terraform\nconfiguration\n.\nProvider docs: tfe\n(API) Token\nHCP Terraform\nA revocable secret string that authenticates a user, to allow use of HCP Terraform's\nAPI\nor the\nremote backend\n.\nDifferent kinds of tokens grant different permissions. Tokens can be granted by user,\nteam\n, or\norganization\n.\nMany applications other than HCP Terraform use token-based authentication, but within HCP Terraform's documentation and UI, \"token\" without any other qualification generally means an HCP Terraform API token.\nHCP Terraform docs: User Tokens\nHCP Terraform docs: Team Tokens\nHCP Terraform docs: Organization Tokens\nTrigger\nHCP Terraform\nSomething that causes a new\nrun\nto queue. Runs can be UI/VCS-driven (in which case the trigger is a new VCS commit or a UI action), API-driven (in which case the trigger is an API call) or CLI-driven (in which case the trigger is a CLI command).\nHCP Terraform docs: UI/VCS-based Run Workflow\nVariables\nAlso \"input variables\".\nIn general-purpose programming, a variable is a symbolic name associated with a value.\nIn Terraform, \"variables\" almost always refers to\ninput variables,\nwhich are key/value pairs used in a\nrun\n. Terraform\nmodules\ncan declare variables to allow customization. For child modules, the parent module provides a value when calling the module; for the\nroot module\n, values are provided at run time.\nHCP Terraform lets you set values for root input variables in a\nworkspace\n, so all collaborators can use the same values. Variable values marked as \"sensitive\" become unreadable in the UI and API, and all variable values are protected by Vault.\nTerraform docs: Input Variables\nHCP Terraform docs: Variables\nVCS\nVersion Control System, like\nGit\n. Software that tracks changes over time to a collection of files, making it possible to keep track of changes, undo changes, and combine changes made in parallel by different users. Usually used for any non-trivial code effort, including infrastructure as code.\nDifferent VCSes use different models for history; Git models changes as a directed acyclic graph of\ncommits\n, and parallel changes that begin from the same parent commit become diverging\nbranches\n(which might later be merged together).\nWikipedia: Version Control\nVCS Provider\nHCP Terraform\nA specific service that provides\nVCS\nfeatures, with the goal of enabling teams to collaborate on code. HCP Terraform can integrate with VCS providers to access your Terraform\nconfigurations\nand\nmodules\n, and currently supports GitHub, GitHub Enterprise, GitLab.com, GitLab EE and CE, Bitbucket Cloud, Bitbucket Data Center, Azure DevOps Server, and Azure DevOps Services.\nHCP Terraform docs: Connecting VCS Providers\nWebhook\nA server-to-server HTTP request, in which one system responds to a change in its internal state by sending information to another system.\nThe recipient of a webhook might return information to the requesting system, call other webhooks in response, perform its action silently, or ignore the request entirely.\nHCP Terraform uses webhooks in multiple ways. Most notably:\nHCP Terraform creates webhook configurations on\nVCS providers\n, so that they send webhook requests to HCP Terraform whenever linked\nrepositories\nreceive\npull requests\nor new\ncommits\n. (\nHCP Terraform docs: UI/VCS-driven Runs\n)\nUsers can create webhook configurations on HCP Terraform\nworkspaces\n, so that HCP Terraform will send run notification webhooks to Slack or other external services. (\nHCP Terraform docs: Run Notifications\n)\nWorking Directory\nThe directory where\nterraform init\nruns, creating a\n.terraform\nsubdirectory. All subsequent commands for the same\nconfiguration\nshould then be run from the same working directory.\nThe\nroot module\nconsists of all of the configuration files in the top level of Terraform's working directory. Subdirectories of the working directory can contain child\nmodules\n.\nWorkspace\nIn Terraform CLI, a workspace is an isolated instance of\nstate\ndata. Using multiple workspaces lets you manage multiple non-overlapping sets of infrastructure from a single\nconfiguration\nin a single\nworking directory\n.\nIn HCP Terraform, a workspace is a complex object that represents everything needed to manage a specific collection of infrastructure resources over time. In particular, this includes:\nA Terraform\nconfiguration\n(which has multiple versions over time, and which can come from a repo or from manual uploads)\nA set of\nvariables\nState\ndata that represents the current and historical condition of the infrastructure\nHistorical information about\nruns\n.\nAll HCP Terraform runs occur in the context of a workspace — they use that workspace's config data, use that workspace's state to identify the real infrastructure being managed, and edit that workspace's state to match any infrastructure changes during the run. A workspace belongs to an\norganization\n.\nHCP Terraform docs: Workspaces\nTerraform docs: Workspaces\nEdit this page on GitHub",
+      "code_examples": [
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "<IDENTIFIER> = <EXPRESSION>",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">&lt;IDENTIFIER&gt; = &lt;EXPRESSION&gt;</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "aws_instance.example.id",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">aws_instance.example.id</code>"
+        },
+        {
+          "language": "hds-code-block__code",
+          "code": "resource\"aws_vpc\"\"main\"{cidr_block=var.base_cidr_block}<BLOCKTYPE>\"<BLOCK LABEL>\"\"<BLOCK LABEL>\"{# Block body<IDENTIFIER>=<EXPRESSION># Argument}",
+          "element": "<pre class=\"hds-code-block__code\" id=\":Rgtdal6j6:\" style=\"max-height:auto\"><code><span><span class=\"line-of-code line-highlight-first line-highlight-last\"><span class=\"line\"><span style=\"color:var(--h..."
+        },
+        {
+          "language": "",
+          "code": "resource\"aws_vpc\"\"main\"{cidr_block=var.base_cidr_block}<BLOCKTYPE>\"<BLOCK LABEL>\"\"<BLOCK LABEL>\"{# Block body<IDENTIFIER>=<EXPRESSION># Argument}",
+          "element": "<code><span><span class=\"line-of-code line-highlight-first line-highlight-last\"><span class=\"line\"><span style=\"color:var(--hds-code-block-color-function)\">resource</span><span style=\"color:var(--hds-..."
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform plan",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform plan</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "create_before_destroy",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">create_before_destroy</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "${<EXPRESSION>}",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">${&lt;EXPRESSION&gt;}</code>"
+        },
+        {
+          "language": "hds-code-block__code",
+          "code": "\"Hello,${var.name}!\"",
+          "element": "<pre class=\"hds-code-block__code\" id=\":R1jddal6j6:\" style=\"max-height:auto\"><code><span><span class=\"line-of-code line-highlight-first line-highlight-last\"><span class=\"line\"><span style=\"color:var(--..."
+        },
+        {
+          "language": "",
+          "code": "\"Hello,${var.name}!\"",
+          "element": "<code><span><span class=\"line-of-code line-highlight-first line-highlight-last\"><span class=\"line\"><span style=\"color:var(--hds-code-block-color-string)\">\"Hello, </span><span style=\"color:var(--hds-co..."
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "#{<EXPRESSION>}",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">#{&lt;EXPRESSION&gt;}</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "${<EXPRESSION>}",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">${&lt;EXPRESSION&gt;}</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform plan",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform plan</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "oauth-token",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">oauth-token</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "oauth-token",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">oauth-token</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "oauth-token",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">oauth-token</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform plan",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform plan</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform destroy",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform destroy</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform plan",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform plan</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform plan",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform plan</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform plan",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform plan</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform apply",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform apply</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform_remote_state",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform_remote_state</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform plan",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform plan</code>"
+        },
+        {
+          "language": "mdx-inline-code_inlineCode__p_0sy",
+          "code": "terraform init",
+          "element": "<code class=\"mdx-inline-code_inlineCode__p_0sy mdx-inline-code_size-200__YiF_7 hds-typography-code-200\">terraform init</code>"
+        }
+      ],
+      "headings": [
+        {
+          "level": 1,
+          "text": "Terraform glossary",
+          "id": "terraform-glossary"
+        },
+        {
+          "level": 2,
+          "text": "Documentation",
+          "id": "sidebar-label"
+        },
+        {
+          "level": 2,
+          "text": "API",
+          "id": "api"
+        },
+        {
+          "level": 2,
+          "text": "Apply (noun)",
+          "id": "apply-noun"
+        },
+        {
+          "level": 2,
+          "text": "Apply (verb)",
+          "id": "apply-verb"
+        },
+        {
+          "level": 2,
+          "text": "Argument",
+          "id": "argument"
+        },
+        {
+          "level": 2,
+          "text": "Attribute",
+          "id": "attribute"
+        },
+        {
+          "level": 2,
+          "text": "Backend",
+          "id": "backend"
+        },
+        {
+          "level": 2,
+          "text": "Blob Storage",
+          "id": "blob-storage"
+        },
+        {
+          "level": 2,
+          "text": "Block",
+          "id": "block"
+        },
+        {
+          "level": 2,
+          "text": "Branch",
+          "id": "branch"
+        },
+        {
+          "level": 2,
+          "text": "CI/CD",
+          "id": "ci-cd"
+        },
+        {
+          "level": 2,
+          "text": "CLI",
+          "id": "cli"
+        },
+        {
+          "level": 2,
+          "text": "Commit",
+          "id": "commit"
+        },
+        {
+          "level": 2,
+          "text": "(Terraform) Configuration",
+          "id": "terraform-configuration"
+        },
+        {
+          "level": 2,
+          "text": "Configuration Version",
+          "id": "configuration-version"
+        },
+        {
+          "level": 2,
+          "text": "Cost Estimation",
+          "id": "cost-estimation"
+        },
+        {
+          "level": 2,
+          "text": "Data Source",
+          "id": "data-source"
+        },
+        {
+          "level": 2,
+          "text": "Deposed",
+          "id": "deposed"
+        },
+        {
+          "level": 2,
+          "text": "Expression",
+          "id": "expression"
+        },
+        {
+          "level": 2,
+          "text": "Fork",
+          "id": "fork"
+        },
+        {
+          "level": 2,
+          "text": "Git",
+          "id": "git"
+        },
+        {
+          "level": 2,
+          "text": "HCL",
+          "id": "hcl"
+        },
+        {
+          "level": 2,
+          "text": "ID",
+          "id": "id"
+        },
+        {
+          "level": 2,
+          "text": "Infrastructure as Code",
+          "id": "infrastructure-as-code"
+        },
+        {
+          "level": 2,
+          "text": "Ingress",
+          "id": "ingress"
+        },
+        {
+          "level": 2,
+          "text": "Input Variables",
+          "id": "input-variables"
+        },
+        {
+          "level": 2,
+          "text": "Interpolation",
+          "id": "interpolation"
+        },
+        {
+          "level": 2,
+          "text": "JSON",
+          "id": "json"
+        },
+        {
+          "level": 2,
+          "text": "Locking",
+          "id": "locking"
+        },
+        {
+          "level": 2,
+          "text": "Log",
+          "id": "log"
+        },
+        {
+          "level": 2,
+          "text": "Module",
+          "id": "module"
+        },
+        {
+          "level": 2,
+          "text": "OAuth",
+          "id": "oauth"
+        },
+        {
+          "level": 2,
+          "text": "OAuth Client",
+          "id": "oauth-client"
+        },
+        {
+          "level": 2,
+          "text": "OAuth Token",
+          "id": "oauth-token"
+        },
+        {
+          "level": 2,
+          "text": "Organization",
+          "id": "organization"
+        },
+        {
+          "level": 2,
+          "text": "Output Values",
+          "id": "output-values"
+        },
+        {
+          "level": 2,
+          "text": "OSS",
+          "id": "oss"
+        },
+        {
+          "level": 2,
+          "text": "Permissions",
+          "id": "permissions"
+        },
+        {
+          "level": 2,
+          "text": "Plan (verb)",
+          "id": "plan-verb"
+        },
+        {
+          "level": 2,
+          "text": "Plan (noun, 1)",
+          "id": "plan-noun-1"
+        },
+        {
+          "level": 2,
+          "text": "Plan File",
+          "id": "plan-file"
+        },
+        {
+          "level": 2,
+          "text": "Policy",
+          "id": "policy"
+        },
+        {
+          "level": 2,
+          "text": "Policy Check",
+          "id": "policy-check"
+        },
+        {
+          "level": 2,
+          "text": "Policy Set",
+          "id": "policy-set"
+        },
+        {
+          "level": 2,
+          "text": "Private Terraform Registry",
+          "id": "private-terraform-registry"
+        },
+        {
+          "level": 2,
+          "text": "Private Terraform Enterprise (PTFE)",
+          "id": "private-terraform-enterprise-ptfe"
+        },
+        {
+          "level": 2,
+          "text": "(Terraform) Provider",
+          "id": "terraform-provider"
+        },
+        {
+          "level": 2,
+          "text": "Pull Request (PR)",
+          "id": "pull-request-pr"
+        },
+        {
+          "level": 2,
+          "text": "Queue",
+          "id": "queue"
+        },
+        {
+          "level": 2,
+          "text": "(Terraform) Registry",
+          "id": "terraform-registry"
+        },
+        {
+          "level": 2,
+          "text": "Remote Operations",
+          "id": "remote-operations"
+        },
+        {
+          "level": 2,
+          "text": "Remote Backend",
+          "id": "remote-backend"
+        },
+        {
+          "level": 2,
+          "text": "Repository",
+          "id": "repository"
+        },
+        {
+          "level": 2,
+          "text": "Resource",
+          "id": "resource"
+        },
+        {
+          "level": 2,
+          "text": "Root Module",
+          "id": "root-module"
+        },
+        {
+          "level": 2,
+          "text": "Root Outputs",
+          "id": "root-outputs"
+        },
+        {
+          "level": 2,
+          "text": "Run",
+          "id": "run"
+        },
+        {
+          "level": 2,
+          "text": "Run Triggers",
+          "id": "run-triggers"
+        },
+        {
+          "level": 2,
+          "text": "S3",
+          "id": "s3"
+        },
+        {
+          "level": 2,
+          "text": "SAML",
+          "id": "saml"
+        },
+        {
+          "level": 2,
+          "text": "Sentinel",
+          "id": "sentinel"
+        },
+        {
+          "level": 2,
+          "text": "Site Admin",
+          "id": "site-admin"
+        },
+        {
+          "level": 2,
+          "text": "Speculative Plan",
+          "id": "speculative-plan"
+        },
+        {
+          "level": 2,
+          "text": "SSH Key",
+          "id": "ssh-key"
+        },
+        {
+          "level": 2,
+          "text": "State",
+          "id": "state"
+        },
+        {
+          "level": 2,
+          "text": "State Version",
+          "id": "state-version"
+        },
+        {
+          "level": 2,
+          "text": "Team",
+          "id": "team"
+        },
+        {
+          "level": 2,
+          "text": "Terraform",
+          "id": "terraform"
+        },
+        {
+          "level": 2,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-18"
+        },
+        {
+          "level": 2,
+          "text": "Terraform Enterprise",
+          "id": "terraform-enterprise"
+        },
+        {
+          "level": 2,
+          "text": "Terraform Version",
+          "id": "terraform-version"
+        },
+        {
+          "level": 2,
+          "text": "TFE",
+          "id": "tfe"
+        },
+        {
+          "level": 2,
+          "text": "TFE Provider / HCP Terraform Provider",
+          "id": "tfe-provider-hcp-terraform-provider"
+        },
+        {
+          "level": 2,
+          "text": "(API) Token",
+          "id": "api-token"
+        },
+        {
+          "level": 2,
+          "text": "Trigger",
+          "id": "trigger"
+        },
+        {
+          "level": 2,
+          "text": "Variables",
+          "id": "variables"
+        },
+        {
+          "level": 2,
+          "text": "VCS",
+          "id": "vcs"
+        },
+        {
+          "level": 2,
+          "text": "VCS Provider",
+          "id": "vcs-provider"
+        },
+        {
+          "level": 2,
+          "text": "Webhook",
+          "id": "webhook"
+        },
+        {
+          "level": 2,
+          "text": "Working Directory",
+          "id": "working-directory"
+        },
+        {
+          "level": 2,
+          "text": "Workspace",
+          "id": "workspace"
+        },
+        {
+          "level": 3,
+          "text": "Resources",
+          "id": ""
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-1"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-2"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-3"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-4"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-5"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-6"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-7"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-8"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-9"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-10"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-11"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-12"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-13"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-14"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-15"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-16"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-17"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-19"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-20"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-21"
+        },
+        {
+          "level": 3,
+          "text": "HCP Terraform",
+          "id": "hcp-terraform-22"
+        }
+      ],
+      "timestamp": 1750757551.10983
+    }
+  ],
+  "total_pages": 2,
+  "errors": []
+}

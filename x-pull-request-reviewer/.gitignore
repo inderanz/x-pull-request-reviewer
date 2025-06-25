@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+.venv/
+venv/
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+
+# Go
+bin/
+*.exe
+*.test
+*.out
+
+# Node/YAML
+node_modules/
+
+# Shell
+*.log
+
+# General
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+*.bak
+*.tmp
+
+# Docker
+*.pid
+*.sock
+
+# Test/coverage
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# LLM/Models
+models/
+ollama/
+
+# Workspace
+workspace/ 
