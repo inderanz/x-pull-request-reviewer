@@ -195,25 +195,59 @@ Enter your choice: 1,3  # Apply changes 1 and 3
 
 ### **Gemini CLI Authentication**
 
-The agent uses **API key authentication** (not Google account login):
+XPRR now uses Gemini CLI as the default LLM provider for PR reviews. To use Gemini CLI, you must authenticate using one of these methods:
 
-```bash
-# Setup process
-./xprr setup
+### Method 1: Google Cloud Project ID (Recommended for Enterprise)
+1. **Authenticate with your Google account:**
+   ```bash
+   gemini auth login
+   ```
+2. **Set your Google Cloud Project ID:**
+   - Run the helper script:
+     ```bash
+     ./scripts/setup-gemini-auth.sh
+     ```
+   - Or manually:
+     ```bash
+     export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"
+     ```
+   - To persist for future sessions:
+     ```bash
+     echo 'export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"' >> ~/.bashrc
+     source ~/.bashrc
+     # Or for zsh:
+     echo 'export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"' >> ~/.zshrc
+     source ~/.zshrc
+     ```
 
-# Agent prompts for API key
-🔑 Gemini CLI Setup
-==================================================
-To use Gemini CLI for code reviews, you need a Gemini API key.
-Get your API key from: https://makersuite.google.com/app/apikey
+### Method 2: Gemini API Key (Alternative)
+1. **Get your API key from Google AI Studio:**
+   - Visit: https://aistudio.google.com/app/apikey
+   - Create a new API key
+2. **Set the API key:**
+   - Run the helper script:
+     ```bash
+     ./scripts/setup-gemini-auth.sh
+     ```
+   - Or manually:
+     ```bash
+     export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+     ```
+   - To persist for future sessions:
+     ```bash
+     echo 'export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"' >> ~/.bashrc
+     source ~/.bashrc
+     # Or for zsh:
+     echo 'export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"' >> ~/.zshrc
+     source ~/.zshrc
+     ```
 
-Enter your Gemini API key: [hidden input]
-```
+### Helper Script
+The `./scripts/setup-gemini-auth.sh` script provides an interactive setup for both authentication methods and automatically handles persistence in your shell configuration.
 
-**Credential Storage:**
-- **System Keyring**: Most secure storage (macOS Keychain, Windows Credential Manager)
-- **Local File**: `~/.xprr/credentials.json`
-- **Environment Variables**: `GEMINI_API_KEY`
+### References
+- **Google Cloud Project ID**: [Gemini CLI Authentication Docs](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/authentication.md)
+- **Gemini API Key**: [Google AI Studio](https://aistudio.google.com/app/apikey)
 
 ### **Google Code Assist Authentication**
 
@@ -758,3 +792,59 @@ A: The review engines exist but are not currently integrated into the main flow.
 ---
 
 **Happy reviewing! 🚀** 
+
+## Gemini CLI Authentication & Project Setup
+
+XPRR now uses Gemini CLI as the default LLM provider for PR reviews. To use Gemini CLI, you must authenticate using one of these methods:
+
+### Method 1: Google Cloud Project ID (Recommended for Enterprise)
+1. **Authenticate with your Google account:**
+   ```bash
+   gemini auth login
+   ```
+2. **Set your Google Cloud Project ID:**
+   - Run the helper script:
+     ```bash
+     ./scripts/setup-gemini-auth.sh
+     ```
+   - Or manually:
+     ```bash
+     export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"
+     ```
+   - To persist for future sessions:
+     ```bash
+     echo 'export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"' >> ~/.bashrc
+     source ~/.bashrc
+     # Or for zsh:
+     echo 'export GOOGLE_CLOUD_PROJECT="YOUR_PROJECT_ID"' >> ~/.zshrc
+     source ~/.zshrc
+     ```
+
+### Method 2: Gemini API Key (Alternative)
+1. **Get your API key from Google AI Studio:**
+   - Visit: https://aistudio.google.com/app/apikey
+   - Create a new API key
+2. **Set the API key:**
+   - Run the helper script:
+     ```bash
+     ./scripts/setup-gemini-auth.sh
+     ```
+   - Or manually:
+     ```bash
+     export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"
+     ```
+   - To persist for future sessions:
+     ```bash
+     echo 'export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"' >> ~/.bashrc
+     source ~/.bashrc
+     # Or for zsh:
+     echo 'export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"' >> ~/.zshrc
+     source ~/.zshrc
+     ```
+
+### Helper Script
+The `./scripts/setup-gemini-auth.sh` script provides an interactive setup for both authentication methods and automatically handles persistence in your shell configuration.
+
+### References
+- **Google Cloud Project ID**: [Gemini CLI Authentication Docs](https://github.com/google-gemini/gemini-cli/blob/main/docs/cli/authentication.md)
+- **Gemini API Key**: [Google AI Studio](https://aistudio.google.com/app/apikey) 

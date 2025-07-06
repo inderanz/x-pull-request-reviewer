@@ -48,7 +48,7 @@ print_error() {
 }
 
 # Configuration
-PACKAGE_NAME="xprr-agent-macos-v1.2.1"
+PACKAGE_NAME="xprr-agent-macos-v0.0.2"
 BUILD_DIR="build"
 PACKAGES_DIR="$BUILD_DIR/packages"
 BIN_DIR="$BUILD_DIR/bin"
@@ -218,13 +218,65 @@ if ! command -v node &> /dev/null; then
     rm -rf "$BUILD_DIR/node-v${NODE_VERSION}-${NODE_ARCH}" "$BUILD_DIR/nodejs.tar.gz"
 fi
 
-# Copy Gemini CLI offline package (optional - will be skipped during install)
-print_status "Copying Gemini CLI offline package..."
-if [ -f "test-offline-package/gemini-cli/google-gemini-cli-0.1.7.tgz" ]; then
-    cp "test-offline-package/gemini-cli/google-gemini-cli-0.1.7.tgz" "$GEMINI_CLI_DIR/"
-    print_success "Gemini CLI offline package copied (installation will be skipped due to dependency issues)"
+# Download and package Gemini CLI
+print_status "Downloading and packaging Gemini CLI..."
+if command -v npm &> /dev/null; then
+    # Create a temporary directory for Gemini CLI
+    TEMP_GEMINI_DIR="$BUILD_DIR/temp-gemini"
+    mkdir -p "$TEMP_GEMINI_DIR"
+    
+    # Download Gemini CLI package
+    print_status "Downloading Gemini CLI package..."
+    cd "$TEMP_GEMINI_DIR"
+    
+    # Create package.json for Gemini CLI
+    cat > package.json << 'EOF'
+{
+  "name": "gemini-cli-offline",
+  "version": "0.1.7",
+  "description": "Offline Gemini CLI package for XPRR",
+  "main": "index.js",
+  "bin": {
+    "gemini": "./bin/gemini.js"
+  },
+  "dependencies": {
+    "@google/gemini-cli": "^0.1.7"
+  },
+  "scripts": {
+    "postinstall": "npm install -g @google/gemini-cli"
+  }
+}
+EOF
+    
+    # Install Gemini CLI
+    print_status "Installing Gemini CLI..."
+    npm install @google/gemini-cli
+    
+    if [ $? -eq 0 ]; then
+        # Create the offline package
+        print_status "Creating Gemini CLI offline package..."
+        mkdir -p "$GEMINI_CLI_DIR"
+        # Use absolute paths for tarball creation
+        TAR_SRC_DIR="$(cd "$TEMP_GEMINI_DIR" && pwd)"
+        TAR_DEST_FILE="$(cd "$GEMINI_CLI_DIR" && pwd)/google-gemini-cli-0.1.7.tgz"
+        tar -czf "$TAR_DEST_FILE" -C "$TAR_SRC_DIR" .
+        if [ $? -eq 0 ]; then
+            print_success "Gemini CLI offline package created successfully"
+        else
+            print_warning "Failed to create Gemini CLI tarball. Will use direct install."
+        fi
+        # Clean up after tarball creation
+        rm -rf "$TEMP_GEMINI_DIR"
+    else
+        print_warning "Failed to install Gemini CLI. Creating empty directory."
+        mkdir -p "$GEMINI_CLI_DIR"
+    fi
+    
+    # Clean up
+    cd "$BUILD_DIR"
+    rm -rf "$TEMP_GEMINI_DIR"
 else
-    print_warning "Gemini CLI offline package not found. Creating empty directory."
+    print_warning "npm not found. Creating empty Gemini CLI directory."
     mkdir -p "$GEMINI_CLI_DIR"
 fi
 
@@ -319,12 +371,32 @@ if [ -f "gemini-cli/google-gemini-cli-0.1.7.tgz" ] && command -v npm &> /dev/nul
     mkdir -p temp-gemini-install
     tar -xzf gemini-cli/google-gemini-cli-0.1.7.tgz -C temp-gemini-install
     cd temp-gemini-install
-    npm install -g .
+    
+    # Install the package globally
+    if npm install -g @google/gemini-cli; then
+        print_success "Gemini CLI installed successfully from local tarball"
+    else
+        print_warning "Failed to install Gemini CLI from tarball, trying direct install..."
+        if npm install -g @google/gemini-cli; then
+            print_success "Gemini CLI installed successfully via direct install"
+        else
+            print_warning "Gemini CLI installation failed. It will not be available."
+        fi
+    fi
+    
     cd ..
     rm -rf temp-gemini-install
-    print_success "Gemini CLI installed from local tarball"
 else
-    print_warning "Gemini CLI tarball not found or npm not installed. Gemini CLI will not be available."
+    print_warning "Gemini CLI tarball not found or npm not installed. Trying direct install..."
+    if command -v npm &> /dev/null; then
+        if npm install -g @google/gemini-cli; then
+            print_success "Gemini CLI installed successfully via direct install"
+        else
+            print_warning "Gemini CLI installation failed. It will not be available."
+        fi
+    else
+        print_warning "npm not installed. Gemini CLI will not be available."
+    fi
 fi
 
 # Make binaries executable

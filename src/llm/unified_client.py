@@ -31,7 +31,7 @@ class UnifiedLLMClient:
         if provider:
             self.provider = provider
         else:
-            self.provider = self.config.get('llm', {}).get('provider', 'ollama')
+            self.provider = self.config.get('llm', {}).get('provider', 'gemini_cli')
         
         # Set environment variables for the selected provider
         self._setup_environment()

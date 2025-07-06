@@ -21,6 +21,8 @@ import os
 import importlib.util
 import glob
 import logging
+import subprocess
+import getpass
 
 # Setup audit logger
 AUDIT_LOG = os.path.join(os.getcwd(), 'logs', 'audit.log')
@@ -30,6 +32,197 @@ logging.basicConfig(filename=AUDIT_LOG, level=logging.INFO, format='[%(asctime)s
 def log_audit(message):
     print(message)
     logging.info(message)
+
+def setup_gemini_auth():
+    """
+    Enhanced Gemini CLI authentication setup following official documentation.
+    Supports both Google Cloud Project ID and Gemini API Key authentication methods.
+    """
+    print("\n🔐 Gemini CLI Authentication Setup")
+    print("=" * 50)
+    print("XPRR uses Gemini CLI for code reviews. Choose your authentication method:")
+    print("1. Google Cloud Project ID (Recommended for enterprise)")
+    print("2. Gemini API Key (Alternative method)")
+    print("3. Both (for maximum compatibility)")
+    print()
+    
+    try:
+        choice = input("Enter your choice [1-3]: ").strip()
+        
+        if choice == "1":
+            return setup_google_cloud_auth()
+        elif choice == "2":
+            return setup_api_key_auth()
+        elif choice == "3":
+            return setup_both_auth()
+        else:
+            print("Invalid choice. Please run the setup again.")
+            return False
+            
+    except KeyboardInterrupt:
+        print("\nSetup cancelled.")
+        return False
+    except Exception as e:
+        print(f"Error during setup: {e}")
+        return False
+
+def setup_google_cloud_auth():
+    """Setup Google Cloud Project ID authentication"""
+    print("\n🔑 Google Cloud Project ID Authentication")
+    print("=" * 40)
+    
+    # Check if gemini CLI is installed
+    if not check_gemini_cli():
+        return False
+    
+    # Check authentication status
+    print("Checking current authentication status...")
+    try:
+        result = subprocess.run(['gemini', 'auth', 'status'], 
+                              capture_output=True, text=True, timeout=10)
+        if result.returncode != 0:
+            print("You are not authenticated. Running 'gemini auth login'...")
+            subprocess.run(['gemini', 'auth', 'login'], check=True)
+    except subprocess.TimeoutExpired:
+        print("Authentication check timed out. Please run 'gemini auth login' manually.")
+        return False
+    except subprocess.CalledProcessError as e:
+        print(f"Authentication failed: {e}")
+        return False
+    
+    # Get Google Cloud Project ID
+    project_id = input("Enter your Google Cloud Project ID: ").strip()
+    if not project_id:
+        print("No project ID provided.")
+        return False
+    
+    # Set environment variable
+    os.environ['GOOGLE_CLOUD_PROJECT'] = project_id
+    print(f"✅ Set GOOGLE_CLOUD_PROJECT={project_id}")
+    
+    # Offer to persist
+    persist = input("Persist this variable in your shell config for future sessions? (y/n): ").strip().lower()
+    if persist in ['y', 'yes']:
+        persist_environment_variable('GOOGLE_CLOUD_PROJECT', project_id)
+    
+    return True
+
+def setup_api_key_auth():
+    """Setup Gemini API Key authentication"""
+    print("\n🔑 Gemini API Key Authentication")
+    print("=" * 35)
+    print("Get your API key from: https://aistudio.google.com/app/apikey")
+    print()
+    
+    # Get API key
+    api_key = getpass.getpass("Enter your Gemini API Key: ")
+    if not api_key:
+        print("No API key provided.")
+        return False
+    
+    # Set environment variable
+    os.environ['GEMINI_API_KEY'] = api_key
+    print("✅ Set GEMINI_API_KEY")
+    
+    # Store in credential manager
+    try:
+        from .llm.credential_manager import get_credential_manager
+        cm = get_credential_manager()
+        cm.set_credential("gemini_cli", "api_key", api_key)
+        print("✅ Stored API key in credential manager")
+    except Exception as e:
+        print(f"Warning: Could not store in credential manager: {e}")
+    
+    # Offer to persist
+    persist = input("Persist this variable in your shell config for future sessions? (y/n): ").strip().lower()
+    if persist in ['y', 'yes']:
+        persist_environment_variable('GEMINI_API_KEY', api_key)
+    
+    return True
+
+def setup_both_auth():
+    """Setup both authentication methods"""
+    print("\n🔑 Setting up both authentication methods...")
+    
+    # Setup Google Cloud Project ID
+    if not setup_google_cloud_auth():
+        return False
+    
+    print("\n" + "=" * 50)
+    
+    # Setup API Key
+    if not setup_api_key_auth():
+        return False
+    
+    return True
+
+def check_gemini_cli():
+    """Check if Gemini CLI is installed"""
+    try:
+        result = subprocess.run(['gemini', '--version'], 
+                              capture_output=True, text=True, timeout=5)
+        if result.returncode == 0:
+            print(f"✅ Gemini CLI found: {result.stdout.strip()}")
+            return True
+        else:
+            print("❌ Gemini CLI not found or not working properly.")
+            print("Please install it first: npm install -g @google/gemini-cli")
+            return False
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        print("❌ Gemini CLI not found.")
+        print("Please install it first: npm install -g @google/gemini-cli")
+        return False
+
+def persist_environment_variable(var_name, value):
+    """Persist environment variable in shell config"""
+    shell_rc = None
+    
+    # Determine shell config file
+    if 'ZSH_VERSION' in os.environ:
+        shell_rc = os.path.expanduser("~/.zshrc")
+    elif 'BASH_VERSION' in os.environ:
+        shell_rc = os.path.expanduser("~/.bashrc")
+    else:
+        # Try to detect from SHELL environment variable
+        shell = os.environ.get('SHELL', '')
+        if 'zsh' in shell:
+            shell_rc = os.path.expanduser("~/.zshrc")
+        elif 'bash' in shell:
+            shell_rc = os.path.expanduser("~/.bashrc")
+        else:
+            shell_rc = os.path.expanduser("~/.profile")
+    
+    if shell_rc:
+        try:
+            with open(shell_rc, 'a') as f:
+                f.write(f'\nexport {var_name}="{value}"\n')
+            print(f"✅ Added to {shell_rc}")
+            print(f"Run 'source {shell_rc}' to activate in current session.")
+        except Exception as e:
+            print(f"Warning: Could not write to {shell_rc}: {e}")
+    else:
+        print("Warning: Could not determine shell config file.")
+
+def check_gemini_auth():
+    """Check if Gemini CLI authentication is properly configured"""
+    # Check for API key
+    if os.environ.get('GEMINI_API_KEY'):
+        return True
+    
+    # Check for Google Cloud Project ID
+    if os.environ.get('GOOGLE_CLOUD_PROJECT'):
+        return True
+    
+    # Check credential manager
+    try:
+        from .llm.credential_manager import get_credential_manager
+        cm = get_credential_manager()
+        if cm.get_credential("gemini_cli", "api_key"):
+            return True
+    except Exception:
+        pass
+    
+    return False
 
 # Plugin loader
 PLUGINS_DIR = os.path.join(os.path.dirname(__file__), 'plugins')
@@ -58,7 +251,7 @@ def start():
     click.echo("Agent started in background mode.")
 
 @cli.command()
-@click.option('--pr', help='GitHub PR link to review')
+@click.argument('pr_url', required=False)
 @click.option('--repo', help='Path to local repo')
 @click.option('--branch', help='Branch to review')
 @click.option('--pr-number', type=int, help='Pull request number (for posting comments)')
@@ -66,7 +259,7 @@ def start():
 @click.option('--no-interactive', is_flag=True, help='Disable interactive change management (useful for CI/CD)')
 @click.option('--provider', type=click.Choice(['ollama', 'google_code_assist', 'gemini_cli']), 
               help='LLM provider to use for the review')
-def review(pr, repo, branch, pr_number, repo_slug, no_interactive, provider):
+def review(pr_url, repo, branch, pr_number, repo_slug, no_interactive, provider):
     """Review a pull request or branch. Optionally post LLM review as PR comment if --pr-number and --repo-slug are provided.
     
     The review now includes interactive change management where you can:
@@ -79,6 +272,20 @@ def review(pr, repo, branch, pr_number, repo_slug, no_interactive, provider):
     interactive = not no_interactive
     plugins = load_plugins()
     
+    # Enhanced Gemini CLI authentication check and setup
+    if provider == "gemini_cli" or (not provider and check_gemini_auth()):
+        if not check_gemini_auth():
+            print("\n🔐 Gemini CLI Authentication Required")
+            print("XPRR uses Gemini CLI for code reviews and requires authentication.")
+            setup_choice = input("Would you like to set up authentication now? (y/n): ").strip().lower()
+            if setup_choice in ['y', 'yes']:
+                if not setup_gemini_auth():
+                    print("Authentication setup failed. Please run 'xprr llm setup-provider --provider gemini_cli' to try again.")
+                    return
+            else:
+                print("Authentication required for Gemini CLI. Please run 'xprr llm setup-provider --provider gemini_cli' when ready.")
+                return
+    
     # Set up provider if specified
     if provider:
         from .llm.unified_client import get_llm_client
@@ -89,14 +296,14 @@ def review(pr, repo, branch, pr_number, repo_slug, no_interactive, provider):
             return
     
     try:
-        log_audit(f"[REVIEW] Starting review: pr={pr}, repo={repo}, branch={branch}, pr_number={pr_number}, repo_slug={repo_slug}, provider={provider or 'default'}")
+        log_audit(f"[REVIEW] Starting review: pr_url={pr_url}, repo={repo}, branch={branch}, pr_number={pr_number}, repo_slug={repo_slug}, provider={provider or 'default'}")
         
         # Import the main review function that handles PR URLs properly
         from .agent.main import review as main_review
         
         # Call the main review function which handles PR URL parsing
         main_review.callback(
-            pr_url=pr,
+            pr_url=pr_url,
             repo_path=repo,
             branch=branch,
             pr_number=pr_number,
@@ -105,7 +312,7 @@ def review(pr, repo, branch, pr_number, repo_slug, no_interactive, provider):
             provider=provider
         )
         
-        log_audit(f"[REVIEW] Completed review: pr={pr}, repo={repo}, branch={branch}, pr_number={pr_number}, repo_slug={repo_slug}")
+        log_audit(f"[REVIEW] Completed review: pr_url={pr_url}, repo={repo}, branch={branch}, pr_number={pr_number}, repo_slug={repo_slug}")
     except Exception as e:
         log_audit(f"[ERROR] Review failed: {e}")
         print(f"[ERROR] Review failed: {e}")
@@ -114,6 +321,25 @@ def review(pr, repo, branch, pr_number, repo_slug, no_interactive, provider):
 def config():
     """Show or edit agent configuration."""
     click.echo("Agent configuration management.")
+
+@cli.command()
+def setup_gemini():
+    """Setup Gemini CLI authentication for code reviews."""
+    print("\n🔐 Gemini CLI Authentication Setup")
+    print("=" * 50)
+    print("This command will help you set up authentication for Gemini CLI.")
+    print("Gemini CLI is used by XPRR for code reviews and requires authentication.")
+    print()
+    
+    if setup_gemini_auth():
+        print("\n✅ Gemini CLI authentication setup completed successfully!")
+        print("\nNext steps:")
+        print("1. Test authentication: gemini auth status")
+        print("2. Run a code review: xprr review <PR_URL>")
+        print("3. If you chose to persist variables, restart your terminal or run: source ~/.zshrc")
+    else:
+        print("\n❌ Gemini CLI authentication setup failed.")
+        print("Please check the error messages above and try again.")
 
 @cli.command()
 @click.option('--technology', help='Specific technology to scrape (go, java, python, terraform, kubernetes, helm, fluxcd, argocd, terraform-aws, terraform-kubernetes, terraform-google)')

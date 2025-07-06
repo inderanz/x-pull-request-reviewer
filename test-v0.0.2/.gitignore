@@ -1,0 +1,112 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+.venv/
+venv/
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+
+# Go
+bin/
+*.exe
+*.test
+*.out
+
+# Node/YAML
+node_modules/
+
+# Shell
+*.log
+
+# General
+.DS_Store
+*.swp
+*.swo
+.idea/
+.vscode/
+*.bak
+*.tmp
+
+# Docker
+*.pid
+*.sock
+
+# Test/coverage
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+
+# LLM/Models
+models/
+ollama/
+ollama_models/
+*.bin
+
+# Workspace
+workspace/ 
+
+# Large files and packages
+*.tar.gz
+packages/
+xprr-agent-*.tar.gz
+
+# Build artifacts
+build/bin/
+bin/checkstyle.jar
+bin/shellcheck
+
+# Test repositories (embedded git repos)
+test-repo/
+
+# Duplicate files
+*.copy
+.github copy/
+
+# Documentation and reports
+*.md
+!README.md
+!LICENSE.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+
+# Configuration files that might contain secrets
+*.env
+.env.*
+config/secrets.yaml
+config/secrets.yml
+
+# Logs and temporary files
+logs/
+*.log
+audit.log
+debug_*.log
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db 

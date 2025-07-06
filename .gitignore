@@ -57,7 +57,7 @@ ollama_models/
 *.bin
 
 # Workspace
-workspace/
+workspace/ 
 
 # Large files and packages
 *.tar.gz

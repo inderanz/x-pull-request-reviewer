@@ -36,7 +36,31 @@ def checkout_branch(repo_dir, branch):
 
 def get_diff(repo_dir, base, compare):
     click.echo(f"Getting diff: {base}..{compare}")
-    return run_git_command(['diff', f'{base}..{compare}'], cwd=repo_dir)
+    try:
+        # First, try to fetch the base branch if it doesn't exist locally
+        try:
+            run_git_command(['show-ref', '--verify', f'refs/heads/{base}'], cwd=repo_dir)
+        except:
+            # Base branch doesn't exist locally, try to fetch it
+            click.echo(f"Base branch '{base}' not found locally, fetching from origin...")
+            try:
+                run_git_command(['fetch', 'origin', base], cwd=repo_dir)
+            except:
+                click.echo(f"Could not fetch base branch '{base}' from origin")
+        
+        # Now try the diff
+        return run_git_command(['diff', f'{base}..{compare}'], cwd=repo_dir)
+    except Exception as e:
+        click.echo(f"[WARNING] Could not get diff {base}..{compare}: {e}")
+        # Fallback: try to get diff against origin/base
+        try:
+            click.echo(f"Trying diff against origin/{base}...")
+            return run_git_command(['diff', f'origin/{base}..{compare}'], cwd=repo_dir)
+        except Exception as e2:
+            click.echo(f"[ERROR] Could not get diff against origin/{base}: {e2}")
+            # Final fallback: get diff against HEAD
+            click.echo("Falling back to diff against HEAD...")
+            return run_git_command(['diff', 'HEAD'], cwd=repo_dir)
 
 
 def get_working_dir_diff(repo_dir):

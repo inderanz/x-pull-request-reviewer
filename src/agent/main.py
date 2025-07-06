@@ -773,24 +773,8 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
 @click.option('--repo-slug', type=str, help='GitHub repo in org/repo format (for posting comments)')
 @click.option('--no-interactive', is_flag=True, help='Disable interactive change management (useful for CI/CD)')
 @click.option('--provider', type=click.Choice(['ollama', 'google_code_assist', 'gemini_cli']), help='LLM provider to use for the review')
-@click.option('--help', is_flag=True, help='Show this message and exit.')
-def review(pr_url, repo_path, branch, pr_number, repo_slug, no_interactive, provider, help):
+def review(pr_url, repo_path, branch, pr_number, repo_slug, no_interactive, provider):
     """Review a pull request or branch. Optionally post LLM review as PR comment if --pr-number and --repo-slug are provided."""
-    if help:
-        click.echo("\nUsage: xprr review [OPTIONS]\n")
-        click.echo("  Review a pull request or branch. Optionally post LLM review as PR comment if --pr-number and --repo-slug are provided.\n")
-        click.echo("  The review now includes interactive change management where you can: - Apply specific suggested changes - Revert applied changes if needed - Selectively ignore certain recommendations\n")
-        click.echo("  Required GitHub token scopes: repo (for private repos), public_repo (for public repos), and write:discussion for comments.\n")
-        click.echo("\nOptions:")
-        click.echo("  --pr TEXT                       GitHub PR link to review")
-        click.echo("  --repo TEXT                     Path to local repo")
-        click.echo("  --branch TEXT                   Branch to review")
-        click.echo("  --pr-number INTEGER             Pull request number (for posting comments)")
-        click.echo("  --repo-slug TEXT                GitHub repo in org/repo format (for posting comments)")
-        click.echo("  --no-interactive                Disable interactive change management (useful for CI/CD)")
-        click.echo("  --provider [ollama|google_code_assist|gemini_cli]  LLM provider to use for the review")
-        click.echo("  --help                          Show this message and exit.")
-        sys.exit(0)
 
     # Handle PR URL and prompt for cloning
     if pr_url and not repo_path:
@@ -864,7 +848,7 @@ def review(pr_url, repo_path, branch, pr_number, repo_slug, no_interactive, prov
         repo_url=None,  # Already handled
         repo_path=repo_path,
         branch=branch,
-        base_branch=None,
+        base_branch=base_branch if 'base_branch' in locals() else 'main',
         pr_number=pr_number,
         repo_slug=repo_slug,
         interactive=not no_interactive,
