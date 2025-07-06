@@ -39,6 +39,27 @@ def get_diff(repo_dir, base, compare):
     return run_git_command(['diff', f'{base}..{compare}'], cwd=repo_dir)
 
 
+def get_working_dir_diff(repo_dir):
+    """Get diff of working directory changes (unstaged and staged changes)."""
+    click.echo("Getting working directory diff...")
+    try:
+        # Get both unstaged and staged changes
+        unstaged = run_git_command(['diff'], cwd=repo_dir)
+        staged = run_git_command(['diff', '--cached'], cwd=repo_dir)
+        
+        if unstaged and staged:
+            return unstaged + "\n" + staged
+        elif unstaged:
+            return unstaged
+        elif staged:
+            return staged
+        else:
+            return ""
+    except Exception as e:
+        click.echo(f"[WARNING] Could not get working directory diff: {e}")
+        return ""
+
+
 def confirm_action(message):
     return click.confirm(message, default=True)
 

@@ -48,7 +48,7 @@ print_error() {
 }
 
 # Configuration
-PACKAGE_NAME="xprr-agent-macos-v1.2.0"
+PACKAGE_NAME="xprr-agent-macos-v1.2.1"
 BUILD_DIR="build"
 PACKAGES_DIR="$BUILD_DIR/packages"
 BIN_DIR="$BUILD_DIR/bin"
@@ -131,17 +131,54 @@ fi
 # Download static analysis tools (only those not already in bin/)
 print_status "Downloading additional static analysis tools..."
 
-# Black
-print_status "Downloading Black..."
+# Python tools
+print_status "Downloading Python tools..."
 pip3 download black -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
-
-# Flake8
-print_status "Downloading Flake8..."
 pip3 download flake8 -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
 
-# YAML Lint
-print_status "Installing YAML Lint..."
+# YAML tools
+print_status "Downloading YAML tools..."
 pip3 download yamllint -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
+
+# Download Go tools
+print_status "Downloading Go tools..."
+if command -v go &> /dev/null; then
+    print_status "Go is available, will use system tools"
+else
+    print_warning "Go not found, Go tools will not be available"
+fi
+
+# Download Java tools
+print_status "Downloading Java tools..."
+if command -v java &> /dev/null; then
+    print_status "Java is available, will use system tools"
+else
+    print_warning "Java not found, Java tools will not be available"
+fi
+
+# Download Terraform tools
+print_status "Downloading Terraform tools..."
+if command -v terraform &> /dev/null; then
+    print_status "Terraform is available, will use system tools"
+else
+    print_warning "Terraform not found, Terraform tools will not be available"
+fi
+
+# Download Shell tools
+print_status "Downloading Shell tools..."
+if command -v shellcheck &> /dev/null; then
+    print_status "ShellCheck is available, will use system tools"
+else
+    print_warning "ShellCheck not found, Shell tools will not be available"
+fi
+
+# Download Node.js tools (for prettier)
+print_status "Downloading Node.js tools..."
+if command -v npm &> /dev/null; then
+    print_status "npm is available, will use system tools"
+else
+    print_warning "npm not found, Node.js tools will not be available"
+fi
 
 # Download Ollama binary for macOS
 print_status "Downloading Ollama binary for macOS..."

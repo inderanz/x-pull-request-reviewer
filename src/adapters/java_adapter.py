@@ -1,32 +1,44 @@
 import subprocess
 import os
+import shutil
 
 BIN_DIR = os.path.join(os.path.dirname(__file__), '../bin')
 GOOGLE_JAVA_FORMAT_BIN = os.path.join(BIN_DIR, 'google-java-format')
 CHECKSTYLE_BIN = os.path.join(BIN_DIR, 'checkstyle')
 
-def run_google_java_format_check(target):
-    """Run local 'google-java-format --dry-run --set-exit-if-changed' and return the output."""
-    if not os.path.isfile(GOOGLE_JAVA_FORMAT_BIN):
-        return '[ERROR] google-java-format binary not found in bin/'
+def _find_tool(tool_name, bin_path):
+    """Find tool in bin/ directory or system PATH."""
+    if os.path.isfile(bin_path):
+        return bin_path
+    # Fallback to system-installed tool
+    system_tool = shutil.which(tool_name)
+    if system_tool:
+        return system_tool
+    return None
+
+def run_google_java_format(directory):
+    """Run 'google-java-format' and return the output."""
+    gjf_path = _find_tool('google-java-format', GOOGLE_JAVA_FORMAT_BIN)
+    if not gjf_path:
+        return '[ERROR] google-java-format not found in bin/ or system PATH'
     try:
         result = subprocess.run([
-            GOOGLE_JAVA_FORMAT_BIN, '--dry-run', '--set-exit-if-changed', target
+            gjf_path, '--dry-run', directory
         ], capture_output=True, text=True)
-        if result.returncode == 0:
-            return "All Java files are properly formatted."
-        return result.stdout.strip() if result.stdout else result.stderr.strip()
+        return result.stdout.strip() if result.returncode == 0 else result.stderr.strip()
     except Exception as e:
         return f"[ERROR] google-java-format: {e}"
 
 
-def run_checkstyle(target, config_file=None):
-    """Run local 'checkstyle' with optional config and return the output."""
-    if not os.path.isfile(CHECKSTYLE_BIN):
-        return '[ERROR] checkstyle binary not found in bin/'
+def run_checkstyle(directory):
+    """Run 'checkstyle' and return the output."""
+    checkstyle_path = _find_tool('checkstyle', CHECKSTYLE_BIN)
+    if not checkstyle_path:
+        return '[ERROR] checkstyle not found in bin/ or system PATH'
     try:
-        cmd = [CHECKSTYLE_BIN, '-c', config_file, target] if config_file else [CHECKSTYLE_BIN, target]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        result = subprocess.run([
+            checkstyle_path, '-c', 'google_checks.xml', directory
+        ], capture_output=True, text=True)
         return result.stdout.strip() if result.returncode == 0 else result.stderr.strip()
     except Exception as e:
         return f"[ERROR] checkstyle: {e}" 

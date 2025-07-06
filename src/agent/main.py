@@ -392,8 +392,13 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
         diff = git_utils.get_diff(repo_dir, base_branch, branch)
         click.echo(f"\n[DIFF] {base_branch}..{branch}:\n{diff[:1000]}{'... (truncated)' if len(diff) > 1000 else ''}")
     else:
-        click.echo("No branch specified for review.")
-        diff = ""
+        # For local repositories without branch specification, use working directory changes
+        click.echo("No branch specified, using working directory changes...")
+        diff = git_utils.get_working_dir_diff(repo_dir)
+        if diff:
+            click.echo(f"\n[DIFF] Working directory changes:\n{diff[:1000]}{'... (truncated)' if len(diff) > 1000 else ''}")
+        else:
+            click.echo("No changes detected in working directory.")
 
     # NEW: Only prompt for external git dependencies if referenced/changed in the diff
     external_git_urls = find_external_git_dependencies_in_diff(diff)
@@ -416,6 +421,17 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
         click.echo(f"\n[STATIC ANALYSIS] {file}")
         click.echo(f"  Format: {results['format']}")
         click.echo(f"  Lint:   {results['lint']}")
+
+    # Detect language (simple heuristic: use first file's extension)
+    language = 'code'
+    if summary:
+        first_file = next(iter(summary))
+        ext = os.path.splitext(first_file)[1]
+        lang_map = {
+            '.tf': 'Terraform', '.py': 'Python', '.yaml': 'YAML', '.yml': 'YAML',
+            '.go': 'Go', '.java': 'Java', '.sh': 'Shell'
+        }
+        language = lang_map.get(ext, 'code')
 
     # NEW: Run comprehensive review engines
     click.echo("\n[INFO] Running comprehensive review engines...")
@@ -526,17 +542,6 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
     
     if review_summaries:
         static_summary_str += "\n\nReview Engine Results:\n" + "\n".join(review_summaries)
-
-    # Detect language (simple heuristic: use first file's extension)
-    language = 'code'
-    if summary:
-        first_file = next(iter(summary))
-        ext = os.path.splitext(first_file)[1]
-        lang_map = {
-            '.tf': 'Terraform', '.py': 'Python', '.yaml': 'YAML', '.yml': 'YAML',
-            '.go': 'Go', '.java': 'Java', '.sh': 'Shell'
-        }
-        language = lang_map.get(ext, 'code')
 
     # Check for large diffs
     diff_size = len(diff) if 'diff' in locals() else 0

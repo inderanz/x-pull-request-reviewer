@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "x-pull-request-reviewer"
-version = "1.0.0"
+version = "1.2.1"
 description = "Enterprise-Grade, Offline, LLM-Powered Code Review Agent"
 readme = "README.md"
 license = {text = "MIT"}
