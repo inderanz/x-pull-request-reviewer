@@ -1,252 +1,259 @@
-# x-pull-request-reviewer
+# 🚀 X-Pull-Request-Reviewer (Enterprise Edition)
 
-**Enterprise-grade, offline, LLM-powered pull request reviewer** with interactive change management and official documentation training capabilities.
+**Enterprise-Grade, Offline, LLM-Powered Code Review Agent**
 
-## 🚀 Features
+Secure | Air-Gapped | Multi-Language | Plug-and-Play
 
-### Core Review Capabilities
-- **Multi-language Support**: Go, Java, Python, Terraform, YAML, Shell
-- **Static Analysis**: Format and lint checks for each language
-- **LLM-powered Reviews**: Uses Ollama (local LLM) for intelligent code review
-- **Security & Compliance**: Checks for security issues, compliance problems, and best practices
-- **Dependency Analysis**: Analyzes dependencies for risks and outdated packages
-- **Test Coverage**: Analyzes test coverage and quality
-- **Documentation**: Reviews documentation quality and completeness
+---
 
-### 🎯 Interactive Change Management
-- **Selective Application**: Choose which suggestions to apply or ignore
-- **Change Tracking**: Track all applied changes with unique IDs
-- **Revert Capability**: Revert specific changes or all changes in a file
-- **Batch Operations**: Apply/revert multiple changes at once
-- **CI/CD Ready**: Non-interactive mode for automated environments
+## ✨ Overview
 
-### 📚 Official Documentation Training
-- **Documentation Scraping**: Gather official docs from technology websites
-- **Training Data Generation**: Create datasets for LLM fine-tuning
-- **Technology Detection**: Automatically detect technologies in code
-- **Enhanced Prompts**: Use official documentation knowledge in reviews
-- **Multi-technology Support**: Handle mixed technology codebases
+X-Pull-Request-Reviewer (XPRR) is a production-ready, enterprise-grade code review agent that automatically analyzes pull requests and provides actionable feedback. It supports multiple LLM providers including Ollama (offline), Gemini CLI, and Google Code Assist.
 
-## 🛠️ Installation
+## 🎯 Features
 
-### Prerequisites
-- Python 3.9+
-- Git
-- Ollama (for local LLM)
-
-### Quick Install
-```bash
-# Clone the repository
-# (or extract the offline package)
-cd x-pull-request-reviewer
-
-# Install dependencies (all requirements are included in the offline package)
-pip install -r requirements.txt
-
-# Start Ollama (if not already running)
-ollama serve
-```
+- **🔒 Offline Capable**: Works with local Ollama models for air-gapped environments
+- **🤖 Multi-LLM Support**: Ollama, Gemini CLI, Google Code Assist
+- **🌍 Multi-Language**: Python, Java, Go, Terraform, YAML, Shell, and more
+- **🔍 Comprehensive Analysis**: Security, compliance, best practices, dependencies
+- **📝 Line-by-Line Comments**: Detailed feedback on specific code lines
+- **⚡ Fast & Efficient**: Optimized for production workloads
+- **🔧 Easy Setup**: One-command installation and configuration
 
 ## 🚀 Quick Start
 
-### Basic Code Review
+### 1. Prerequisites
+
+- **Python 3.8+**
+- **Node.js & npm** (for Gemini CLI)
+- **Git** (recommended)
+
+### 2. Installation
+
 ```bash
-# Review a local repository
-python -m xprr_agent review --repo <path-to-your-repo> --branch main --no-interactive
+# Clone or download the xprr-production directory
+cd xprr-production
+
+# Run the setup script
+./setup.sh
 ```
 
-> **Note:** Use `python -m xprr_agent` instead of `python xprr_agent.py` for all commands.
+The setup script will:
+- ✅ Install Python dependencies
+- ✅ Install Gemini CLI (if Node.js is available)
+- ✅ Create necessary directories
+- ✅ Set up configuration files
+- ✅ Prompt for API keys
 
-### Interactive Change Management
+### 3. First Run
+
 ```bash
-# Review with interactive change management
-python xprr_agent.py review --repo ./my-project --branch feature-branch
+# Check if everything is working
+./xprr status
 
-# The system will prompt you to:
-# 1. Choose which suggestions to apply
-# 2. Revert changes if needed
-# 3. Track all modifications
-```
-
-### Training with Official Documentation
-```bash
-# Create sample training data
-python xprr_agent.py scrape-docs --sample-only
-
-# Scrape Go documentation
-python xprr_agent.py scrape-docs --technology go --max-pages 20
-
-# Create training dataset
-python xprr_agent.py create-dataset
-
-# List supported technologies
-python xprr_agent.py list-technologies
-```
-
-## 📖 Usage Guide
-
-### Interactive Change Management
-
-The system provides an interactive interface for managing code review suggestions:
-
-```
-📝 ACTIONABLE CHANGES (3):
-  [1] src/main.py:15: Add input validation for user_id parameter
-      Reason: Security vulnerability - missing input validation
-      Current: user_id = request.args.get('user_id')
-
-  [2] src/utils.py:23: Consider using a more descriptive variable name
-      Reason: Code readability - variable name is too generic
-      Current: data = process_data(input_data)
-
-  [3] src/database.py:45: Add error handling for database connection
-      Reason: Robustness - missing exception handling
-      Current: connection = db.connect()
-
-CHANGE APPLICATION OPTIONS
---------------------------------------------------------------------------------
-You can apply specific changes using the following options:
-• Enter suggestion ID (e.g., '1') to apply a specific change
-• Enter 'all' to apply all suggested changes
-• Enter 'none' to skip all changes
-• Enter multiple IDs separated by commas (e.g., '1,3,5')
-
-Enter your choice: 1,3
-```
-
-### Training System
-
-#### Phase 1: Documentation Scraping
-```bash
-# Scrape specific technology
-python xprr_agent.py scrape-docs --technology go --max-pages 30
-
-# Scrape all technologies (takes longer)
-python xprr_agent.py scrape-docs --max-pages 25 --delay 3.0
-```
-
-#### Phase 2: Training Dataset Creation
-```bash
-# Create dataset from scraped data
-python xprr_agent.py create-dataset
-
-# Create dataset for specific technology
-python xprr_agent.py create-dataset --technology go
-```
-
-#### Phase 3: Enhanced Reviews
-The enhanced prompts automatically use the trained knowledge:
-```bash
-# Review with enhanced prompts
-python xprr_agent.py review --repo ./my-project --branch feature-branch
+# Review your first PR
+./xprr review https://github.com/org/repo/pull/123
 ```
 
 ## 🔧 Configuration
 
-### Environment Variables
+### LLM Providers
+
+XPRR supports three LLM providers:
+
+#### 1. **Ollama (Offline)** - Default
 ```bash
-# LLM Configuration
-export LLM_HOST=http://localhost
-export LLM_PORT=11434
-export LLM_MODEL=codellama
-
-# GitHub Integration
-export GITHUB_TOKEN=your_github_token_here
+# Uses local Ollama models - no internet required
+./xprr review https://github.com/org/repo/pull/123
 ```
 
-### Configuration File
-Edit `config/default.yaml`:
-```yaml
-llm:
-  provider: ollama
-  model: codellama
-  port: 11434
-github:
-  token: your_github_token_here
-  api_url: https://api.github.com
-agent:
-  mode: background
-  log_level: INFO
+#### 2. **Gemini CLI** - Recommended for online use
+```bash
+# Uses Google's Gemini model via CLI
+./xprr review https://github.com/org/repo/pull/123 --provider gemini_cli
 ```
+
+#### 3. **Google Code Assist**
+```bash
+# Uses Google Code Assist API
+./xprr review https://github.com/org/repo/pull/123 --provider google_code_assist
+```
+
+### API Key Setup
+
+#### Gemini CLI
+```bash
+# The setup script will prompt for your API key
+# Or set it manually:
+export GEMINI_API_KEY="your-api-key-here"
+
+# Get your API key from: https://makersuite.google.com/app/apikey
+```
+
+#### Google Code Assist
+```bash
+# Set your Google Cloud credentials
+export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"
+```
+
+## 📋 Usage
+
+### Basic Commands
+
+```bash
+# Setup dependencies and credentials
+./xprr setup
+
+# Check agent status
+./xprr status
+
+# Review a pull request
+./xprr review <PR_URL>
+
+# Review with specific provider
+./xprr review <PR_URL> --provider gemini_cli
+
+# Non-interactive mode (for CI/CD)
+./xprr review <PR_URL> --no-interactive
+
+# Stop the agent
+./xprr stop
+
+# Check air-gap readiness
+./xprr check-airgap
+```
+
+### Advanced Usage
+
+```bash
+# Review by PR number and repo slug
+./xprr review --pr-number 123 --repo-slug org/repo
+
+# Review with specific provider and non-interactive
+./xprr review --pr-number 123 --repo-slug org/repo --provider gemini_cli --no-interactive
+```
+
+## 🔍 What XPRR Analyzes
+
+### Security Analysis
+- 🔐 Hardcoded credentials
+- 🚨 SQL injection vulnerabilities
+- ⚠️ XSS vulnerabilities
+- 🔑 Secret scanning
+- 🛡️ Input validation issues
+
+### Compliance Checks
+- 📄 License compliance
+- ©️ Copyright issues
+- 🌍 Export control compliance
+- 📋 Regulatory requirements
+
+### Best Practices
+- 📝 Documentation quality
+- 🧪 Test coverage
+- 🔧 Code formatting
+- 📚 Dependency management
+- 🏗️ Architecture patterns
+
+### Language-Specific Analysis
+- **Python**: Black formatting, flake8 linting, docstrings
+- **Java**: Google Java Format, Checkstyle
+- **Go**: gofmt, golint
+- **Terraform**: terraform fmt, tflint
+- **YAML**: yamllint, prettier
+- **Shell**: shfmt, shellcheck
 
 ## 🏗️ Architecture
 
-### Core Components
-- **Agent**: Main orchestration and review logic
-- **LLM**: Ollama integration and prompt management
-- **Adapters**: Language-specific static analysis
-- **Review Engines**: Security, compliance, best practices
-- **Change Manager**: Interactive change tracking and reversion
-- **Training System**: Documentation scraping and dataset generation
+```
+xprr-production/
+├── src/                    # Source code
+│   ├── agent/             # Core agent logic
+│   ├── adapters/          # Language-specific adapters
+│   ├── llm/               # LLM provider integrations
+│   ├── review/            # Review engines
+│   └── github/            # GitHub API client
+├── tests/                 # Test suite
+├── config/                # Configuration files
+├── bin/                   # Binary dependencies
+├── packages/              # Python wheel packages
+├── ollama_models/         # Ollama model files
+├── logs/                  # Log files
+├── xprr                   # Main CLI script
+├── setup.sh               # Setup script
+└── README.md              # This file
+```
 
-### Technology Detection
-The system automatically detects technologies in your code:
-- **Go**: `package main`, `import`, `func`, `goroutine`
-- **Java**: `public class`, `import java`, `extends`
-- **Python**: `import`, `def`, `class`, `if __name__`
-- **Terraform**: `terraform`, `resource`, `data`, `variable`
-- **Kubernetes**: `apiVersion:`, `kind:`, `metadata:`, `spec:`
-- **Helm**: `apiVersion:`, `kind: Chart`, `values:`, `{{`
-- **FluxCD**: `apiVersion: source.toolkit.fluxcd.io`
-- **ArgoCD**: `apiVersion: argoproj.io/v1alpha1`
+## 🔧 Development
 
-## 📚 Supported Technologies
-
-| Technology | Documentation | Focus Areas |
-|------------|---------------|-------------|
-| **Go** | https://golang.org/doc/ | Concurrency, performance, idioms |
-| **Java** | https://docs.oracle.com/en/java/javase/ | OOP design, patterns, security |
-| **Python** | https://docs.python.org/3/ | Pythonic code, performance, readability |
-| **Terraform** | https://registry.terraform.io/ | Syntax, modules, state management |
-| **Kubernetes** | https://kubernetes.io/docs/ | Manifests, resource management, security |
-| **Helm** | https://helm.sh/docs/ | Templates, values, best practices |
-| **FluxCD** | https://fluxcd.io/docs/ | GitOps, deployment patterns |
-| **ArgoCD** | https://argo-cd.readthedocs.io/ | Deployment flows, sync strategies |
-
-## 🧪 Testing
-
-Run the test suite:
+### Running Tests
 ```bash
 # Run all tests
-python -m pytest
+python -m pytest tests/ -v
 
-# Run specific test file
-python -m pytest tests/test_change_manager.py -v
+# Run specific test
+python -m pytest tests/test_adapters.py -v
 
 # Run with coverage
-python -m pytest --cov=agent --cov=llm --cov=review
+python -m pytest tests/ --cov=src --cov-report=html
 ```
 
-## 🔄 CI/CD Integration
+### Adding New Language Support
+1. Create adapter in `src/adapters/`
+2. Add language detection in `src/agent/static_analysis.py`
+3. Add test cases in `tests/`
+4. Update documentation
 
-### Non-Interactive Mode
+### Adding New LLM Provider
+1. Create client in `src/llm/`
+2. Add to unified client in `src/llm/unified_client.py`
+3. Add credential management in `src/llm/credential_manager.py`
+4. Update CLI options in `xprr`
+
+## 🚀 Deployment
+
+### Docker Deployment
 ```bash
-# Use in CI/CD pipelines
-python xprr_agent.py review --repo ./project --branch feature --no-interactive
+# Build the image
+docker build -t xprr .
+
+# Run the container
+docker run -it --rm xprr review <PR_URL>
 ```
 
-### Automated Training
+### CI/CD Integration
 ```bash
-# Weekly documentation updates
-python xprr_agent.py scrape-docs --technology go --max-pages 10
-python xprr_agent.py create-dataset
-# Trigger model retraining
+# Non-interactive mode for automation
+./xprr review <PR_URL> --no-interactive --provider gemini_cli
 ```
 
-## 📖 Documentation
+### Air-Gapped Deployment
+1. Download all wheel packages to `packages/`
+2. Download Ollama models to `ollama_models/`
+3. Run `./xprr check-airgap` to verify readiness
+4. Use `--provider ollama` for offline operation
 
-- [Training Guide](docs/training_guide.md) - Complete guide to training with official documentation
-- [Interactive Review Example](examples/interactive_review_example.md) - Real-world usage examples
-- [API Documentation](docs/api.md) - Developer API reference
+## 📊 Performance
+
+- **Review Speed**: 30-60 seconds per PR (depending on size and provider)
+- **Memory Usage**: 100-500MB (depending on model size)
+- **CPU Usage**: Moderate during analysis
+- **Network**: Minimal (except for API calls)
+
+## 🔒 Security
+
+- **No Code Execution**: XPRR only analyzes code, never executes it
+- **Secure Credentials**: API keys stored in system keyring
+- **Air-Gapped**: Can operate completely offline
+- **Audit Trail**: All actions logged for compliance
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
+4. Add tests
+5. Submit a pull request
 
 ## 📄 License
 
@@ -254,18 +261,34 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- [Ollama](https://ollama.ai/) for local LLM capabilities
-- [Code Llama](https://github.com/facebookresearch/codellama) for code understanding
-- Official documentation sites for training data
-- Open source community for inspiration and feedback
-
-## 🆘 Support
-
-- **Issues**: Report bugs and feature requests on GitHub
-- **Documentation**: Check the [docs](docs/) directory
-- **Examples**: See [examples](examples/) for usage patterns
-- **Training**: Follow the [training guide](docs/training_guide.md)
+- **Developer**: Inder Chauhan
+- **Organization**: https://anzx.ai/
+- **Team**: X-agents Team
 
 ---
 
-**Ready to revolutionize your code review process?** Start with the quick start guide and explore the interactive change management and training capabilities! 🚀 
+## 🆘 Support
+
+### Common Issues
+
+**Q: Gemini CLI installation fails**
+A: Ensure Node.js and npm are installed. Run `node --version` and `npm --version` to verify.
+
+**Q: API key not working**
+A: Check that your API key is correct and has the necessary permissions.
+
+**Q: Ollama model not found**
+A: Run `./xprr setup` to install the required model.
+
+**Q: Permission denied on xprr script**
+A: Run `chmod +x xprr` to make it executable.
+
+### Getting Help
+
+- 📖 Check the documentation in `docs/`
+- 🐛 Report issues with detailed logs
+- 💬 Ask questions in the community
+
+---
+
+**Happy reviewing! 🚀** 

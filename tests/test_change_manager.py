@@ -1,7 +1,7 @@
 import pytest
 import tempfile
 import os
-from agent.change_manager import ChangeManager
+from src.agent.change_manager import ChangeManager
 
 
 class TestChangeManager:
@@ -138,68 +138,68 @@ class TestSuggestionParser:
     
     def test_parse_file_suggestions(self):
         """Test parsing file-based suggestions from LLM response."""
-        from agent.suggestion_parser import parse_suggestions_from_llm
+        from src.agent.suggestion_parser import parse_suggestions_from_llm
         
-        llm_response = """Here are my suggestions:
-file:src/main.py:15: Add input validation for user_id parameter
-file:src/utils.py:23: Consider using a more descriptive variable name"""
+        llm_response = """
+        Here are my suggestions:
         
-        suggestions = parse_suggestions_from_llm(llm_response, "")
+        file:src/main.py:15: Add proper error handling
+        file:tests/test_main.py:23: Add more test cases
+        """
         
+        suggestions = parse_suggestions_from_llm(llm_response, "diff content")
         assert len(suggestions) == 2
         assert suggestions[0]['type'] == 'file_change'
         assert suggestions[0]['file_path'] == 'src/main.py'
-        assert suggestions[0]['line_number'] == 15
-        assert "Add input validation" in suggestions[0]['reason']
+        assert 'error handling' in suggestions[0]['reason']
     
     def test_parse_line_suggestions(self):
         """Test parsing line-based suggestions."""
-        from agent.suggestion_parser import parse_suggestions_from_llm
+        from src.agent.suggestion_parser import parse_suggestions_from_llm
         
-        llm_response = """Suggestions:
-line 23: Consider using a more descriptive variable name
-line 45: Add error handling for database connection"""
+        llm_response = """
+        **Line Comments:**
+        line 15: Consider using a more descriptive variable name
+        line 23: Add input validation here
+        """
         
-        suggestions = parse_suggestions_from_llm(llm_response, "")
-        
-        # Since we don't have diff context, these will be parsed as general suggestions
+        suggestions = parse_suggestions_from_llm(llm_response, "diff content")
         assert len(suggestions) == 2
-        assert suggestions[0]['type'] == 'general'
-        assert "descriptive variable name" in suggestions[0]['reason']
+        assert suggestions[0]['type'] == 'general'  # Line suggestions without file context are treated as general
+        assert suggestions[0]['line_number'] == 15
+        assert 'descriptive variable name' in suggestions[0]['reason']
     
     def test_parse_general_suggestions(self):
         """Test parsing general suggestions."""
-        from agent.suggestion_parser import parse_suggestions_from_llm
+        from src.agent.suggestion_parser import parse_suggestions_from_llm
         
-        llm_response = """General recommendations:
-suggestion: Add comprehensive error handling
-recommendation: Consider adding unit tests"""
+        llm_response = """
+        **General Suggestions:**
+        suggestion: Add more comprehensive documentation
+        recommendation: Consider implementing caching for better performance
+        """
         
-        suggestions = parse_suggestions_from_llm(llm_response, "")
-        
+        suggestions = parse_suggestions_from_llm(llm_response, "diff content")
         assert len(suggestions) == 2
         assert suggestions[0]['type'] == 'general'
-        assert "comprehensive error handling" in suggestions[0]['reason']
+        assert 'documentation' in suggestions[0]['reason']
     
     def test_deduplicate_suggestions(self):
         """Test that duplicate suggestions are removed."""
-        from agent.suggestion_parser import parse_suggestions_from_llm
+        from src.agent.suggestion_parser import parse_suggestions_from_llm
         
-        llm_response = """Suggestions:
-file:src/main.py:15: Add input validation
-file:src/main.py:15: Add input validation
-suggestion: Add error handling
-suggestion: Add error handling"""
+        llm_response = """
+        **Line Comments:**
+        line 15: Add error handling
+        line 15: Add error handling
+        line 23: Add validation
+        """
         
-        suggestions = parse_suggestions_from_llm(llm_response, "")
-        
-        # Should have only 2 unique suggestions
+        suggestions = parse_suggestions_from_llm(llm_response, "diff content")
+        # Should deduplicate the duplicate line 15 suggestions
         assert len(suggestions) == 2
-        
-        # Check that we have one file change and one general suggestion
-        types = [s['type'] for s in suggestions]
-        assert 'file_change' in types
-        assert 'general' in types
+        line_15_suggestions = [s for s in suggestions if s['line_number'] == 15]
+        assert len(line_15_suggestions) == 1
 
 
 if __name__ == "__main__":

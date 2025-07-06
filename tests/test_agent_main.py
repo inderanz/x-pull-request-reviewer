@@ -1,15 +1,15 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from agent import main
+from src.agent import main
 import os
 
-@patch('agent.main.get_latest_commit_sha', return_value='dummysha')
-@patch('agent.main.git_utils')
-@patch('agent.main.analyze_directory')
-@patch('agent.main.build_review_prompt')
-@patch('agent.main.query_ollama')
-@patch('agent.main.post_pr_comment')
-@patch('agent.main.post_line_comment')
+@patch('src.agent.main.get_latest_commit_sha', return_value='dummysha')
+@patch('src.agent.main.git_utils')
+@patch('src.agent.main.analyze_directory')
+@patch('src.agent.main.build_review_prompt')
+@patch('src.agent.main.query_llm_for_review')
+@patch('src.agent.main.post_pr_comment')
+@patch('src.agent.main.post_line_comment')
 def test_review_pr_or_branch_full_workflow(mock_line_comment, mock_pr_comment, mock_llm, mock_prompt, mock_analyze, mock_git, mock_commit_sha):
     # Setup mocks
     mock_git.clone_repo.return_value = None
@@ -28,7 +28,7 @@ def test_review_pr_or_branch_full_workflow(mock_line_comment, mock_pr_comment, m
     mock_git.get_diff.return_value = diff
     mock_analyze.return_value = {'foo.py': {'format': 'ok', 'lint': 'ok'}}
     mock_prompt.return_value = 'prompt'
-    mock_llm.return_value = 'LLM review: Looks good.'
+    mock_llm.return_value = ([('foo.py', 1, 'Good change')], 'Summary: Good changes')
     mock_pr_comment.return_value = '[INFO] Comment posted.'
     mock_line_comment.return_value = '[INFO] Line comment posted.'
 
@@ -51,7 +51,7 @@ def test_review_pr_or_branch_full_workflow(mock_line_comment, mock_pr_comment, m
         assert mock_pr_comment.called
         mock_line_comment.assert_called()
 
-@patch('agent.main.git_utils')
+@patch('src.agent.main.git_utils')
 def test_review_pr_or_branch_missing_repo(mock_git):
     # Should print error and return
     with patch('click.echo') as mock_echo:

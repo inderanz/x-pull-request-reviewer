@@ -1,4 +1,4 @@
-from review import security, compliance, best_practices, dependency, test_coverage, documentation
+from src.review import security, compliance, best_practices, dependency, test_coverage, documentation
 import tempfile
 import os
 

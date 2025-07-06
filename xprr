@@ -1,0 +1,511 @@
+#!/usr/bin/env python3
+"""
+X-Pull-Request-Reviewer (XPRR) - Production Grade PR Review Agent
+Enterprise-Grade, Offline, LLM-Powered Code Review Agent
+"""
+
+import os
+import sys
+import subprocess
+import json
+import time
+import signal
+import argparse
+import getpass
+import shutil
+from pathlib import Path
+
+# Add the package directory to Python path
+SCRIPT_DIR = Path(__file__).parent
+sys.path.insert(0, str(SCRIPT_DIR))
+
+# Banner
+BANNER = r"""
+============================================================
+   🚀 X-PULL-REQUEST-REVIEWER (Enterprise Edition)
+============================================================
+  Enterprise-Grade, Offline, LLM-Powered Code Review Agent
+  Secure | Air-Gapped | Multi-Language | Plug-and-Play
+============================================================
+✨ Offered by https://anzx.ai/ — Personal project of Inder Chauhan
+🤖 Part of the X-agents Team — Always learning, always evolving!
+🙏 Thanks to its Developer Inder Chauhan for this amazing tool!
+"""
+
+class XPRRAgent:
+    def __init__(self):
+        self.base_dir = SCRIPT_DIR
+        self.packages_dir = self.base_dir / "packages"
+        self.ollama_dir = self.base_dir / "ollama"
+        self.ollama_models_dir = self.base_dir / "ollama_models"
+        self.logs_dir = self.base_dir / "logs"
+        self.venv_dir = self.base_dir / "venv"
+        self.ollama_port = 11434
+        self.ollama_pid_file = self.logs_dir / "ollama.pid"
+        
+        # Ensure directories exist
+        self.logs_dir.mkdir(exist_ok=True)
+        
+    def log(self, message, level="INFO"):
+        """Log message with timestamp"""
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        log_message = f"[{timestamp}] [{level}] {message}"
+        print(log_message)
+        
+        # Also write to log file
+        with open(self.logs_dir / "xprr.log", "a") as f:
+            f.write(log_message + "\n")
+    
+    def check_and_install_gemini_cli(self):
+        """Check if Gemini CLI is installed and install if needed"""
+        self.log("Checking Gemini CLI installation...")
+        
+        # Check if npm is available
+        if not shutil.which("npm"):
+            self.log("npm not found. Please install Node.js and npm first.", "ERROR")
+            return False
+        
+        # Check if Gemini CLI is already installed
+        if shutil.which("gemini"):
+            self.log("Gemini CLI is already installed")
+            return True
+        
+        # Try to install Gemini CLI
+        self.log("Installing Gemini CLI...")
+        try:
+            result = subprocess.run(
+                ["npm", "install", "-g", "@google/gemini-cli"],
+                capture_output=True,
+                text=True,
+                timeout=300  # 5 minutes timeout
+            )
+            
+            if result.returncode == 0:
+                self.log("Gemini CLI installed successfully")
+                return True
+            else:
+                self.log(f"Failed to install Gemini CLI: {result.stderr}", "ERROR")
+                return False
+                
+        except subprocess.TimeoutExpired:
+            self.log("Gemini CLI installation timed out", "ERROR")
+            return False
+        except Exception as e:
+            self.log(f"Error installing Gemini CLI: {e}", "ERROR")
+            return False
+    
+    def setup_gemini_api_key(self):
+        """Prompt user for Gemini API key and store it"""
+        self.log("Setting up Gemini API key...")
+        
+        # Check if API key is already set
+        if os.environ.get('GEMINI_API_KEY'):
+            self.log("GEMINI_API_KEY already set in environment")
+            return True
+        
+        try:
+            from src.llm.credential_manager import get_credential_manager
+            cm = get_credential_manager()
+            
+            # Check if API key is already stored
+            existing_key = cm.get_credential("gemini_cli", "api_key")
+            if existing_key:
+                os.environ['GEMINI_API_KEY'] = existing_key
+                self.log("GEMINI_API_KEY loaded from stored credentials")
+                return True
+            
+            # Prompt user for API key
+            print("\n🔑 Gemini CLI Setup")
+            print("=" * 50)
+            print("To use Gemini CLI for code reviews, you need a Gemini API key.")
+            print("Get your API key from: https://makersuite.google.com/app/apikey")
+            print()
+            
+            api_key = getpass.getpass("Enter your Gemini API key: ")
+            if not api_key:
+                self.log("No API key provided. Gemini CLI will not be available.", "WARNING")
+                return False
+            
+            # Store the API key
+            cm.set_credential("gemini_cli", "api_key", api_key)
+            os.environ['GEMINI_API_KEY'] = api_key
+            self.log("GEMINI_API_KEY stored and set in environment")
+            return True
+            
+        except Exception as e:
+            self.log(f"Error setting up Gemini API key: {e}", "ERROR")
+            return False
+    
+    def check_airgap_readiness(self):
+        """Check if all required wheels, binaries, and models are present and compatible for air-gapped use."""
+        self.log("Checking air-gap readiness...")
+        # Check wheels
+        required_wheels = [
+            'requests', 'beautifulsoup4', 'toml', 'click', 'PyYAML',
+            'GitPython', 'rich', 'tqdm', 'markdown_it_py', 'pygments'
+        ]
+        wheel_mapping = {
+            'requests': 'requests-2.32.4-py3-none-any.whl',
+            'beautifulsoup4': 'beautifulsoup4-4.13.4-py3-none-any.whl',
+            'toml': 'toml-0.10.2-py2.py3-none-any.whl',
+            'click': 'click-8.1.8-py3-none-any.whl',
+            'PyYAML': 'PyYAML-6.0.2-cp311-cp311-macosx_11_0_arm64.whl',
+            'GitPython': 'GitPython-3.1.44-py3-none-any.whl',
+            'rich': 'rich-14.0.0-py3-none-any.whl',
+            'tqdm': 'tqdm-4.67.1-py3-none-any.whl',
+            'markdown_it_py': 'markdown_it_py-3.0.0-py3-none-any.whl',
+            'pygments': 'pygments-2.19.2-py3-none-any.whl'
+        }
+        all_ok = True
+        for pkg in required_wheels:
+            wheel_file = self.packages_dir / wheel_mapping[pkg]
+            if not wheel_file.exists():
+                self.log(f"[AIRGAP] MISSING WHEEL: {wheel_file}", "ERROR")
+                all_ok = False
+        # Check gofmt binary
+        gofmt_path = self.base_dir / "bin/gofmt"
+        if not gofmt_path.exists():
+            self.log(f"[AIRGAP] MISSING BINARY: {gofmt_path}", "ERROR")
+            all_ok = False
+        # Check Ollama model
+        model_dir = self.ollama_models_dir
+        if not model_dir.exists() or not any(model_dir.iterdir()):
+            self.log(f"[AIRGAP] MISSING OLLAMA MODEL in {model_dir}", "ERROR")
+            all_ok = False
+        if all_ok:
+            self.log("[AIRGAP] All required wheels, binaries, and models are present.")
+        else:
+            self.log("[AIRGAP] Some requirements are missing. See errors above.", "ERROR")
+        return all_ok
+
+    def check_dependencies(self):
+        """Check and install all dependencies including Gemini CLI"""
+        self.log("Checking dependencies...")
+        
+        # Check Python dependencies
+        try:
+            import requests
+            import click
+            import yaml
+            import git
+            import rich
+            import tqdm
+            self.log("Python dependencies are available")
+        except ImportError as e:
+            self.log(f"Missing Python dependency: {e}", "ERROR")
+            self.log("Please install required Python packages")
+            return False
+        
+        # Check and install Gemini CLI
+        if not self.check_and_install_gemini_cli():
+            self.log("Gemini CLI setup failed, but continuing with other providers", "WARNING")
+        
+        # Setup Gemini API key
+        self.setup_gemini_api_key()
+        
+        return True
+    
+    def install_dependencies(self, packages):
+        """Install dependencies from local wheel files. Never reach the internet."""
+        self.log("Installing dependencies from local packages...")
+        wheel_mapping = {
+            'requests': 'requests-2.32.4-py3-none-any.whl',
+            'beautifulsoup4': 'beautifulsoup4-4.13.4-py3-none-any.whl',
+            'toml': 'toml-0.10.2-py2.py3-none-any.whl',
+            'click': 'click-8.1.8-py3-none-any.whl',
+            'PyYAML': 'PyYAML-6.0.2-cp311-cp311-macosx_11_0_arm64.whl',
+            'GitPython': 'GitPython-3.1.44-py3-none-any.whl',
+            'rich': 'rich-14.0.0-py3-none-any.whl',
+            'tqdm': 'tqdm-4.67.1-py3-none-any.whl',
+            'markdown_it_py': 'markdown_it_py-3.0.0-py3-none-any.whl',
+            'pygments': 'pygments-2.19.2-py3-none-any.whl'
+        }
+        for package in packages:
+            if package in wheel_mapping:
+                wheel_file = self.packages_dir / wheel_mapping[package]
+                if wheel_file.exists():
+                    try:
+                        subprocess.run([
+                            sys.executable, "-m", "pip", "install", 
+                            "--no-index", "--find-links", str(self.packages_dir),
+                            wheel_file.name
+                        ], check=True, capture_output=True)
+                        self.log(f"Installed {package}")
+                    except subprocess.CalledProcessError as e:
+                        self.log(f"Failed to install {package}: {e}", "ERROR")
+                        self.log(f"[AIRGAP] Ensure the wheel is compatible with your Python version and OS/arch.", "ERROR")
+                else:
+                    self.log(f"Wheel file not found for {package}: {wheel_file}", "ERROR")
+                    self.log(f"[AIRGAP] Download the correct wheel for your Python version and OS/arch.", "ERROR")
+    
+    def start_ollama(self):
+        """Start Ollama server if not running"""
+        self.log("Checking Ollama server...")
+        
+        # Check if Ollama is already running
+        try:
+            import requests
+            response = requests.get(f"http://localhost:{self.ollama_port}/api/tags", timeout=5)
+            if response.status_code == 200:
+                self.log("Ollama server is already running")
+                return True
+        except:
+            pass
+        
+        # Determine Ollama binary
+        import platform
+        system = platform.system()
+        if system == "Darwin":
+            ollama_bin = self.ollama_dir / "ollama-macos"
+        elif system == "Linux":
+            ollama_bin = self.ollama_dir / "ollama-linux"
+        else:
+            self.log(f"Unsupported OS: {system}", "ERROR")
+            return False
+        
+        if not ollama_bin.exists():
+            self.log(f"Ollama binary not found: {ollama_bin}", "ERROR")
+            return False
+        
+        # Start Ollama
+        self.log("Starting Ollama server...")
+        try:
+            process = subprocess.Popen([
+                str(ollama_bin), "serve",
+                "--model-path", str(self.ollama_models_dir),
+                "--port", str(self.ollama_port)
+            ], stdout=open(self.logs_dir / "ollama.log", "w"), 
+               stderr=subprocess.STDOUT)
+            
+            # Save PID
+            with open(self.ollama_pid_file, "w") as f:
+                f.write(str(process.pid))
+            
+            # Wait for Ollama to start
+            for i in range(30):  # Wait up to 30 seconds
+                time.sleep(1)
+                try:
+                    response = requests.get(f"http://localhost:{self.ollama_port}/api/tags", timeout=5)
+                    if response.status_code == 200:
+                        self.log("Ollama server started successfully")
+                        return True
+                except:
+                    pass
+            
+            self.log("Ollama server failed to start", "ERROR")
+            return False
+            
+        except Exception as e:
+            self.log(f"Failed to start Ollama: {e}", "ERROR")
+            return False
+    
+    def ensure_model_available(self, model_name="codellama:7b-instruct"):
+        """Ensure the required model is available"""
+        self.log(f"Checking model availability: {model_name}")
+        
+        try:
+            import requests
+            
+            # Check if model exists
+            response = requests.get(f"http://localhost:{self.ollama_port}/api/tags")
+            if response.status_code == 200:
+                models = response.json().get("models", [])
+                model_names = [m.get("name", "") for m in models]
+                
+                if model_name in model_names:
+                    self.log(f"Model {model_name} is available")
+                    return True
+            
+            # Model not found, try to pull it
+            self.log(f"Model {model_name} not found, attempting to pull...")
+            response = requests.post(f"http://localhost:{self.ollama_port}/api/pull", 
+                                   json={"name": model_name})
+            
+            if response.status_code == 200:
+                self.log(f"Model {model_name} pulled successfully")
+                return True
+            else:
+                self.log(f"Failed to pull model {model_name}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"Error checking model availability: {e}", "ERROR")
+            return False
+    
+    def review_pr(self, pr_url, pr_number=None, repo_slug=None, interactive=True, provider=None):
+        """Review a pull request"""
+        self.log(f"Starting PR review for: {pr_url}")
+        
+        # Import the review function
+        try:
+            from src.agent.main import review_pr_or_branch
+        except ImportError as e:
+            self.log(f"Failed to import review module: {e}", "ERROR")
+            return False
+        
+        try:
+            # Extract repo slug from URL if not provided
+            if not repo_slug and pr_url:
+                # Parse GitHub URL to extract org/repo
+                if "github.com" in pr_url:
+                    parts = pr_url.split("github.com/")[1].split("/")
+                    if len(parts) >= 2:
+                        repo_slug = f"{parts[0]}/{parts[1]}"
+            
+            # Extract PR number from URL if not provided
+            if not pr_number and pr_url:
+                if "/pull/" in pr_url:
+                    pr_number = int(pr_url.split("/pull/")[1].split("/")[0])
+            
+            self.log(f"Reviewing PR #{pr_number} in {repo_slug}")
+            
+            # Run the review
+            review_pr_or_branch(
+                repo_url=pr_url,
+                pr_number=pr_number,
+                repo_slug=repo_slug,
+                interactive=interactive,
+                provider=provider
+            )
+            
+            return True
+            
+        except Exception as e:
+            self.log(f"Review failed: {e}", "ERROR")
+            return False
+    
+    def cleanup(self):
+        """Cleanup resources"""
+        # Stop Ollama if we started it
+        if self.ollama_pid_file.exists():
+            try:
+                with open(self.ollama_pid_file, "r") as f:
+                    pid = int(f.read().strip())
+                
+                os.kill(pid, signal.SIGTERM)
+                self.log("Stopped Ollama server")
+                
+                # Remove PID file
+                self.ollama_pid_file.unlink(missing_ok=True)
+                
+            except Exception as e:
+                self.log(f"Error stopping Ollama: {e}", "WARNING")
+
+def main():
+    """Main CLI entry point"""
+    print(BANNER)
+    
+    parser = argparse.ArgumentParser(
+        description="X-Pull-Request-Reviewer - Enterprise-grade PR review agent",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  xprr review https://github.com/org/repo/pull/123
+  xprr review --pr-number 123 --repo-slug org/repo
+  xprr review --pr-number 123 --repo-slug org/repo --no-interactive
+  xprr review --pr-number 123 --repo-slug org/repo --provider gemini_cli
+  xprr check-airgap
+        """
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    
+    # Review command
+    review_parser = subparsers.add_parser('review', help='Review a pull request')
+    review_parser.add_argument('pr_url', nargs='?', help='GitHub PR URL')
+    review_parser.add_argument('--pr-number', type=int, help='Pull request number')
+    review_parser.add_argument('--repo-slug', help='Repository slug (org/repo)')
+    review_parser.add_argument('--no-interactive', action='store_true', 
+                              help='Disable interactive mode (useful for CI/CD)')
+    review_parser.add_argument('--provider', choices=['ollama', 'gemini_cli', 'google_code_assist'],
+                              help='LLM provider to use for review')
+    
+    # Status command
+    status_parser = subparsers.add_parser('status', help='Check agent status')
+    
+    # Stop command
+    stop_parser = subparsers.add_parser('stop', help='Stop the agent')
+    
+    # Airgap check command
+    airgap_parser = subparsers.add_parser('check-airgap', help='Check air-gap readiness (wheels, binaries, models)')
+    
+    # Setup command
+    setup_parser = subparsers.add_parser('setup', help='Setup dependencies and credentials')
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+    
+    agent = XPRRAgent()
+    
+    try:
+        if args.command == 'setup':
+            # Setup dependencies and credentials
+            agent.log("Setting up XPRR agent...")
+            agent.check_dependencies()
+            agent.log("Setup complete")
+            
+        elif args.command == 'status':
+            # Check status
+            agent.log("Checking agent status...")
+            agent.check_dependencies()
+            ollama_running = agent.start_ollama()
+            if ollama_running:
+                agent.ensure_model_available()
+            agent.log("Status check complete")
+            
+        elif args.command == 'stop':
+            # Stop agent
+            agent.log("Stopping agent...")
+            agent.cleanup()
+            agent.log("Agent stopped")
+            
+        elif args.command == 'review':
+            # Review PR
+            if not args.pr_url and not args.pr_number:
+                print("Error: Must provide either PR URL or PR number")
+                return
+            
+            # Initialize agent
+            if not agent.check_dependencies():
+                print("Error: Failed to check dependencies")
+                return
+            
+            # Start Ollama if using ollama provider or no provider specified
+            if not args.provider or args.provider == 'ollama':
+                if not agent.start_ollama():
+                    print("Error: Failed to start Ollama server")
+                    return
+                
+                if not agent.ensure_model_available():
+                    print("Error: Failed to ensure model availability")
+                    return
+            
+            # Run review
+            success = agent.review_pr(
+                pr_url=args.pr_url,
+                pr_number=args.pr_number,
+                repo_slug=args.repo_slug,
+                interactive=not args.no_interactive,
+                provider=args.provider
+            )
+            
+            if not success:
+                sys.exit(1)
+        
+        elif args.command == 'check-airgap':
+            agent.check_airgap_readiness()
+            return
+    
+    except KeyboardInterrupt:
+        agent.log("Interrupted by user")
+        agent.cleanup()
+    except Exception as e:
+        agent.log(f"Unexpected error: {e}", "ERROR")
+        agent.cleanup()
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()

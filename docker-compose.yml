@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  xprr-agent:
+    build: .
+    container_name: xprr-agent
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GOOGLE_CODE_ASSIST_API_KEY=${GOOGLE_CODE_ASSIST_API_KEY}
+    volumes:
+      - ./workspace:/app/workspace
+      - ./logs:/app/logs
+      - ./config:/app/config
+    working_dir: /app
+    command: ["--help"]
+    restart: unless-stopped
+
+  xprr-agent-dev:
+    build: .
+    container_name: xprr-agent-dev
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GOOGLE_CODE_ASSIST_API_KEY=${GOOGLE_CODE_ASSIST_API_KEY}
+      - DEBUG=true
+    volumes:
+      - ./src:/app/src
+      - ./workspace:/app/workspace
+      - ./logs:/app/logs
+      - ./config:/app/config
+      - ./tests:/app/tests
+    working_dir: /app
+    command: ["python", "-m", "pytest", "tests/", "-v"]
+    profiles:
+      - dev 
