@@ -48,7 +48,7 @@ print_error() {
 }
 
 # Configuration
-PACKAGE_NAME="xprr-agent-macos-v0.0.2"
+PACKAGE_NAME="xprr-agent-macos-v0.1.1"
 BUILD_DIR="build"
 PACKAGES_DIR="$BUILD_DIR/packages"
 BIN_DIR="$BUILD_DIR/bin"
@@ -252,14 +252,12 @@ EOF
     print_status "Installing Gemini CLI..."
     npm install @google/gemini-cli
     
-    if [ $? -eq 0 ]; then
+    if [ $? -eq 0 ] && [ -d "$TEMP_GEMINI_DIR" ]; then
         # Create the offline package
         print_status "Creating Gemini CLI offline package..."
         mkdir -p "$GEMINI_CLI_DIR"
-        # Use absolute paths for tarball creation
-        TAR_SRC_DIR="$(cd "$TEMP_GEMINI_DIR" && pwd)"
-        TAR_DEST_FILE="$(cd "$GEMINI_CLI_DIR" && pwd)/google-gemini-cli-0.1.7.tgz"
-        tar -czf "$TAR_DEST_FILE" -C "$TAR_SRC_DIR" .
+        # Create tarball from current directory
+        tar -czf "$GEMINI_CLI_DIR/google-gemini-cli-0.1.7.tgz" -C "$TEMP_GEMINI_DIR" .
         if [ $? -eq 0 ]; then
             print_success "Gemini CLI offline package created successfully"
         else
@@ -273,7 +271,6 @@ EOF
     fi
     
     # Clean up
-    cd "$BUILD_DIR"
     rm -rf "$TEMP_GEMINI_DIR"
 else
     print_warning "npm not found. Creating empty Gemini CLI directory."

@@ -5,7 +5,7 @@ from .static_analysis import analyze_directory
 from .diff_utils import parse_unified_diff, chunk_diff_by_file_and_hunk
 from .change_manager import ChangeManager
 from .suggestion_parser import parse_suggestions_from_llm, extract_code_changes_from_suggestions
-from ..llm.review_prompt import build_review_prompt, build_actionable_suggestions_prompt
+from ..llm.review_prompt import build_enhanced_review_prompt, build_actionable_suggestions_prompt
 from ..llm.unified_client import get_llm_client, query_llm_for_review
 from ..github.pr_client import post_pr_comment, post_line_comment, get_pr_metadata
 from ..review.security import security_issues_in_diff
@@ -585,7 +585,7 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
         
         if using_gemini_cli:
             click.echo("[INFO] Using Gemini CLI - processing entire diff without chunking...")
-            prompt = build_review_prompt(diff, static_summary_str, language)
+            prompt = build_enhanced_review_prompt(diff, static_summary_str, language)
             try:
                 line_comments, summary_comment = query_llm_for_review(prompt, diff, provider=detected_provider)
                 click.echo(f"[LLM] Response received: {len(line_comments)} comments, summary: {summary_comment[:100]}...")
@@ -618,7 +618,7 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
                 chunk_idx += 1
                 chunk_desc = f"{file_path or ''} {hunk_header or ''}".strip()
                 click.echo(f"[CHUNK {chunk_idx}/{total_chunks}] Reviewing chunk: {chunk_desc} (size: {len(chunk_str)} chars)")
-                prompt = build_review_prompt(chunk_str, static_summary_str, language)
+                prompt = build_enhanced_review_prompt(chunk_str, static_summary_str, language)
                 chunk_start = time.time()
                 try:
                     line_comments, summary_comment = query_llm_for_review(prompt, chunk_str, provider=detected_provider)
@@ -639,7 +639,7 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
                         subchunk = '\n'.join(sublines[i:i+10])
                         if not subchunk.strip():
                             continue
-                        subprompt = build_review_prompt(subchunk, static_summary_str, language)
+                        subprompt = build_enhanced_review_prompt(subchunk, static_summary_str, language)
                         try:
                             sub_start = time.time()
                             sub_line_comments, sub_summary = query_llm_for_review(subprompt, subchunk, provider=detected_provider)
@@ -684,25 +684,21 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
             log_audit(f"[ERROR] Interactive change management failed: {e}")
 
     # Parse diff for actual changed lines and map LLM comments to real line numbers
+    from .diff_utils import map_llm_comments_to_lines, parse_unified_diff
+    
     diff_lines = parse_unified_diff(diff)
     first_file = diff_lines[0][0] if diff_lines else None
     first_line = diff_lines[0][1] if diff_lines else 1
 
-    # Map LLM comments to actual diff lines
-    mapped_comments = []
-    if all_line_comments and diff_lines:
-        # Extract just the comments from LLM output (ignore line numbers)
-        llm_comments = [comment for _, _, comment in all_line_comments]
-        
-        # Map each comment to a diff line, cycling through if we have more comments than lines
-        for i, comment in enumerate(llm_comments):
-            diff_index = i % len(diff_lines)
-            file_path, line_num, _ = diff_lines[diff_index]
-            mapped_comments.append((file_path, line_num, comment))
-    elif all_line_comments:
-        # If no diff lines but we have comments, map to first file
-        for _, _, comment in all_line_comments:
-            mapped_comments.append((first_file, first_line, comment))
+    # Use intelligent line mapping instead of random cycling
+    mapped_comments = map_llm_comments_to_lines(all_line_comments, diff)
+    
+    # Log the mapping results for debugging
+    click.echo(f"\n[DEBUG] Line mapping results:")
+    click.echo(f"Original LLM comments: {len(all_line_comments)}")
+    click.echo(f"Mapped comments: {len(mapped_comments)}")
+    for i, (orig, mapped) in enumerate(zip(all_line_comments, mapped_comments)):
+        click.echo(f"  {i+1}. {orig} -> {mapped}")
 
     # Post line-specific comments for actionable findings (LLM-powered)
     if pr_number and repo_slug and os.environ.get('GITHUB_TOKEN') and branch:

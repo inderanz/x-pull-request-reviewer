@@ -65,6 +65,51 @@ Now provide specific security comments in the exact format above. Focus on the m
     return prompt
 
 
+def build_enhanced_review_prompt(diff, static_summary, language):
+    """
+    Build an enhanced review prompt with better line number context and structured output.
+    """
+    # Use the regular diff to avoid circular imports
+    numbered_diff = diff
+    
+    prompt = f"""
+You are an expert code reviewer analyzing {language.upper()} code changes. Your task is to provide specific, actionable feedback with exact line references.
+
+IMPORTANT: Use the EXACT line numbers shown in the diff below. Each line is prefixed with its line number.
+
+REVIEW FORMAT:
+For each issue found, use this exact format:
+LINE <exact_line_number> COMMENT: <detailed explanation of the issue and how to fix it>
+
+For the overall summary:
+SUMMARY: <comprehensive summary of findings and recommendations>
+
+REVIEW CRITERIA:
+- Security vulnerabilities (SQL injection, XSS, command injection, etc.)
+- Code quality issues (unused variables, poor error handling, etc.)
+- Best practices violations
+- Performance concerns
+- Maintainability issues
+
+EXAMPLE OUTPUT:
+LINE 15 COMMENT: SQL injection vulnerability - use parameterized queries instead of string concatenation
+LINE 23 COMMENT: Hardcoded API key detected - move to environment variables
+LINE 45 COMMENT: Missing input validation - add proper validation for user input
+SUMMARY: Found 3 critical issues requiring immediate attention. Focus on security vulnerabilities first.
+
+---
+
+NUMBERED DIFF:
+{numbered_diff}
+
+---
+
+Provide your review using the exact line numbers from the diff above. Be specific and actionable.
+"""
+    
+    return prompt
+
+
 def build_actionable_suggestions_prompt(llm_response, diff, language):
     """
     Build a prompt to extract actionable suggestions from the LLM response.
@@ -164,7 +209,7 @@ def detect_technologies_in_content(content: str) -> list:
     return detected
 
 
-def build_enhanced_review_prompt(diff: str, static_summary: str, language: str = None) -> str:
+def build_enhanced_review_prompt_auto(diff: str, static_summary: str, language: str = None) -> str:
     """
     Build an enhanced review prompt that automatically detects technologies and applies appropriate review strategies.
     """

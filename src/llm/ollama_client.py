@@ -203,41 +203,40 @@ def fallback_extract_suggestions(llm_output):
     line_comments = []
     summary = None
     
-    # Try strict format first
+    # Try enhanced format: "LINE <number> COMMENT: ..."
     for l in llm_output.splitlines():
-        if l.strip().startswith('LINE:') and 'COMMENT:' in l:
-            try:
-                parts = l.split('COMMENT:')
-                line_part = parts[0].replace('LINE:', '').strip()
-                comment = parts[1].strip()
-                if ':' in line_part:
-                    file_path, line_num = line_part.split(':', 1)
-                    file_path = file_path.strip()
-                    line_num = int(line_num.strip())
-                else:
-                    file_path = None
-                    line_num = int(line_part.strip())
-                # Accept any reasonable line number since agent will map it
-                if 1 <= line_num <= 100000:
-                    line_comments.append((file_path, line_num, comment))
-            except Exception:
+        # Match "LINE 15 COMMENT: ..." format (enhanced)
+        m = re.match(r'\s*LINE\s+(\d+)\s+COMMENT:\s*(.+)', l, re.IGNORECASE)
+        if m:
+            line_num = int(m.group(1))
+            comment = m.group(2).strip()
+            # Accept any reasonable line number since agent will map it
+            if 1 <= line_num <= 100000:
+                line_comments.append((None, line_num, comment))
                 continue
-        elif l.strip().startswith('SUMMARY:'):
-            summary = l.replace('SUMMARY:', '').strip()
     
-    # Try the trained model format: "LINE 5 COMMENT: ..."
+    # Try strict format: "LINE:file:line COMMENT: ..."
     if not line_comments:
         for l in llm_output.splitlines():
-            # Match "LINE 5 COMMENT: ..." format
-            m = re.match(r'\s*LINE\s+(\d+)\s+COMMENT:\s*(.+)', l, re.IGNORECASE)
-            if m:
-                line_num = int(m.group(1))
-                comment = m.group(2).strip()
-                # Accept any reasonable line number since agent will map it
-                if 1 <= line_num <= 100000:
-                    line_comments.append((None, line_num, comment))
+            if l.strip().startswith('LINE:') and 'COMMENT:' in l:
+                try:
+                    parts = l.split('COMMENT:')
+                    line_part = parts[0].replace('LINE:', '').strip()
+                    comment = parts[1].strip()
+                    if ':' in line_part:
+                        file_path, line_num = line_part.split(':', 1)
+                        file_path = file_path.strip()
+                        line_num = int(line_num.strip())
+                    else:
+                        file_path = None
+                        line_num = int(line_part.strip())
+                    # Accept any reasonable line number since agent will map it
+                    if 1 <= line_num <= 100000:
+                        line_comments.append((file_path, line_num, comment))
+                except Exception:
+                    continue
     
-    # Fallback: regex for 'line <num>:' or 'Line <num>:'
+    # Try regex for 'line <num>:' or 'Line <num>:'
     if not line_comments:
         for l in llm_output.splitlines():
             m = re.match(r'\s*line\s*(\d+)\s*[:\-]\s*(.+)', l, re.IGNORECASE)
@@ -248,6 +247,17 @@ def fallback_extract_suggestions(llm_output):
                 if 1 <= line_num <= 100000:
                     line_comments.append((None, line_num, comment))
     
+    # Try file:line format
+    if not line_comments:
+        for l in llm_output.splitlines():
+            m = re.match(r'\s*([^:\s]+):(\d+)\s*[:\-]\s*(.+)', l)
+            if m:
+                file_path = m.group(1).strip()
+                line_num = int(m.group(2))
+                comment = m.group(3).strip()
+                if 1 <= line_num <= 100000:
+                    line_comments.append((file_path, line_num, comment))
+    
     # Fallback: look for bullet points or numbered lists
     if not line_comments:
         for l in llm_output.splitlines():
@@ -255,6 +265,12 @@ def fallback_extract_suggestions(llm_output):
             if m:
                 comment = m.group(1).strip()
                 line_comments.append((None, 1, comment))
+    
+    # Extract summary
+    for l in llm_output.splitlines():
+        if l.strip().startswith('SUMMARY:'):
+            summary = l.replace('SUMMARY:', '').strip()
+            break
     
     # Fallback: use first paragraph as summary
     if not summary:
