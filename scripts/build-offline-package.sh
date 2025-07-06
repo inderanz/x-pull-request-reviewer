@@ -86,6 +86,16 @@ cp README.md "$BUILD_DIR/"
 cp LICENSE "$BUILD_DIR/"
 cp .gitignore "$BUILD_DIR/"
 
+# NEW: Copy existing binary tools (instead of downloading)
+print_status "Copying existing binary tools..."
+cp -r bin/* "$BIN_DIR/"
+
+# NEW: Copy Ollama models (only deepseek-coder-6.7b.bin for size optimization)
+print_status "Copying Ollama models..."
+mkdir -p "$BUILD_DIR/ollama_models"
+cp ollama_models/deepseek-coder-6.7b.bin "$BUILD_DIR/ollama_models/"
+print_success "Copied deepseek-coder-6.7b.bin (3.6GB) for offline operation"
+
 # Download Python wheels
 print_status "Downloading Python wheels..."
 pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
@@ -99,8 +109,8 @@ elif [ "$ARCH" = "x86_64" ]; then
     pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
 fi
 
-# Download static analysis tools
-print_status "Downloading static analysis tools..."
+# Download static analysis tools (only those not already in bin/)
+print_status "Downloading additional static analysis tools..."
 
 # Black
 print_status "Downloading Black..."
@@ -109,58 +119,6 @@ pip3 download black -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-ver
 # Flake8
 print_status "Downloading Flake8..."
 pip3 download flake8 -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
-
-# Download Terraform
-print_status "Downloading Terraform..."
-TERRAFORM_VERSION="1.7.0"
-if [ "$ARCH" = "arm64" ]; then
-    TERRAFORM_ARCH="darwin_arm64"
-else
-    TERRAFORM_ARCH="darwin_amd64"
-fi
-
-curl -L "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_${TERRAFORM_ARCH}.zip" -o "$BUILD_DIR/terraform.zip"
-unzip -q "$BUILD_DIR/terraform.zip" -d "$BIN_DIR/"
-rm "$BUILD_DIR/terraform.zip"
-
-# Download TFLint
-print_status "Downloading TFLint..."
-TFLINT_VERSION="v0.58.0"
-if [ "$ARCH" = "arm64" ]; then
-    TFLINT_ARCH="darwin_arm64"
-else
-    TFLINT_ARCH="darwin_amd64"
-fi
-
-curl -L "https://github.com/terraform-linters/tflint/releases/download/${TFLINT_VERSION}/tflint_${TFLINT_ARCH}.zip" -o "$BUILD_DIR/tflint.zip"
-unzip -q "$BUILD_DIR/tflint.zip" -d "$BIN_DIR/"
-rm "$BUILD_DIR/tflint.zip"
-
-# Download other tools
-print_status "Downloading additional tools..."
-
-# ShellCheck
-SHELLCHECK_VERSION="v0.9.0"
-if [ "$ARCH" = "arm64" ]; then
-    SHELLCHECK_ARCH="darwin.x86_64"
-else
-    SHELLCHECK_ARCH="darwin.x86_64"
-fi
-
-curl -L "https://github.com/koalaman/shellcheck/releases/download/${SHELLCHECK_VERSION}/shellcheck-${SHELLCHECK_VERSION}.${SHELLCHECK_ARCH}.tar.xz" -o "$BUILD_DIR/shellcheck.tar.xz"
-tar -xf "$BUILD_DIR/shellcheck.tar.xz" -C "$BUILD_DIR/"
-cp "$BUILD_DIR/shellcheck-${SHELLCHECK_VERSION}/shellcheck" "$BIN_DIR/"
-rm -rf "$BUILD_DIR/shellcheck-${SHELLCHECK_VERSION}" "$BUILD_DIR/shellcheck.tar.xz"
-
-# shfmt
-SHFMT_VERSION="v3.8.0"
-if [ "$ARCH" = "arm64" ]; then
-    SHFMT_ARCH="darwin_arm64"
-else
-    SHFMT_ARCH="darwin_amd64"
-fi
-
-curl -L "https://github.com/mvdan/sh/releases/download/${SHFMT_VERSION}/shfmt_${SHFMT_VERSION}_${SHFMT_ARCH}" -o "$BIN_DIR/shfmt"
 
 # YAML Lint
 print_status "Installing YAML Lint..."
@@ -183,19 +141,14 @@ if ! command -v node &> /dev/null; then
     rm -rf "$BUILD_DIR/node-v${NODE_VERSION}-${NODE_ARCH}" "$BUILD_DIR/nodejs.tar.gz"
 fi
 
-# Download Gemini CLI
-print_status "Downloading Gemini CLI..."
-if command -v npm &> /dev/null; then
-    # Download Gemini CLI package
-    npm pack @google/gemini-cli --pack-destination "$GEMINI_CLI_DIR"
-    
-    # Create a local npm registry
-    mkdir -p "$NODE_MODULES_DIR/@google"
-    cp -r "$GEMINI_CLI_DIR"/* "$NODE_MODULES_DIR/@google/"
-    
-    print_success "Gemini CLI package downloaded"
+# Copy Gemini CLI offline package (optional - will be skipped during install)
+print_status "Copying Gemini CLI offline package..."
+if [ -f "test-offline-package/gemini-cli/google-gemini-cli-0.1.7.tgz" ]; then
+    cp "test-offline-package/gemini-cli/google-gemini-cli-0.1.7.tgz" "$GEMINI_CLI_DIR/"
+    print_success "Gemini CLI offline package copied (complete offline package with all dependencies)"
 else
-    print_warning "npm not available. Gemini CLI will need to be installed manually."
+    print_warning "Gemini CLI offline package not found. Creating empty directory."
+    mkdir -p "$GEMINI_CLI_DIR"
 fi
 
 # Make all binaries executable
@@ -264,21 +217,32 @@ else
     exit 1
 fi
 
+# Create virtual environment for local installation
+print_status "Creating virtual environment..."
+python3 -m venv venv
+source venv/bin/activate
+
 # Install Python dependencies from local wheels
 print_status "Installing Python dependencies from local wheels..."
-python3 -m pip install --no-index --find-links=packages -r requirements.txt
+pip install --no-index --find-links=packages -r requirements.txt
 
 # Install the package itself
 print_status "Installing XPRR package..."
-python3 -m pip install --no-index --find-links=packages -e .
+pip install --no-index --find-links=packages -e .
 
-# Install Gemini CLI if available
-if [ -d "gemini-cli" ] && command -v npm &> /dev/null; then
-    print_status "Installing Gemini CLI..."
-    npm install -g gemini-cli/*.tgz
-    print_success "Gemini CLI installed"
+# Install Gemini CLI from local tarball if available
+if [ -f "gemini-cli/google-gemini-cli-0.1.7.tgz" ] && command -v npm &> /dev/null; then
+    print_status "Installing Gemini CLI from local tarball..."
+    # Extract and install the complete offline package
+    mkdir -p temp-gemini-install
+    tar -xzf gemini-cli/google-gemini-cli-0.1.7.tgz -C temp-gemini-install
+    cd temp-gemini-install
+    npm install -g .
+    cd ..
+    rm -rf temp-gemini-install
+    print_success "Gemini CLI installed from local tarball"
 else
-    print_warning "Gemini CLI not available or npm not found"
+    print_warning "Gemini CLI tarball not found or npm not installed. Gemini CLI will not be available."
 fi
 
 # Make binaries executable
@@ -290,20 +254,37 @@ print_status "Creating necessary directories..."
 mkdir -p logs
 mkdir -p ollama_models
 
+# Setup Ollama models
+print_status "Setting up Ollama models..."
+if [ -f "ollama_models/deepseek-coder-6.7b.bin" ]; then
+    print_success "Ollama model found: deepseek-coder-6.7b.bin"
+    print_status "To use offline mode, ensure Ollama is running and the model is loaded:"
+    echo "  ollama run deepseek-coder-6.7b"
+else
+    print_warning "Ollama model not found. Offline mode will not work."
+fi
+
 print_success "Offline installation completed!"
 echo
 echo -e "${GREEN}🎉 XPRR is now ready to use!${NC}"
 echo
 echo -e "${BLUE}Next steps:${NC}"
-echo "1. Run: ./scripts/start-agent.sh (to start the agent)"
-echo "2. Run: xprr --help (to see available commands)"
-echo "3. Run: xprr review <PR_URL> (to review a pull request)"
+echo "1. Activate virtual environment: source venv/bin/activate"
+echo "2. Run: ./scripts/start-agent.sh (to start the agent)"
+echo "3. Run: xprr --help (to see available commands)"
+echo "4. Run: xprr review <PR_URL> (to review a pull request)"
 echo
 echo -e "${BLUE}Available commands:${NC}"
 echo "  xprr setup          - Setup dependencies and credentials"
 echo "  xprr status         - Check agent status"
 echo "  xprr review <URL>   - Review a pull request"
 echo "  xprr llm list-providers - List available LLM providers"
+echo
+echo -e "${BLUE}Offline Mode:${NC}"
+echo "  - All binary tools are included (Java, Go, Python, Terraform, YAML, Shell)"
+echo "  - Ollama model included: deepseek-coder-6.7b.bin (3.6GB)"
+echo "  - All review engines are integrated (Security, Compliance, Best Practices, etc.)"
+echo "  - Interactive change management is available"
 echo
 echo -e "${GREEN}Happy reviewing! 🚀${NC}"
 EOF
@@ -322,17 +303,36 @@ System: $OS $ARCH
 Python Version: $PYTHON_VERSION
 
 Contents:
-- Python wheels: $(ls "$PACKAGES_DIR"/*.whl | wc -l) files
-- Binaries: $(ls "$BIN_DIR" | wc -l) files
+- Python wheels: $(ls "$PACKAGES_DIR"/*.whl 2>/dev/null | wc -l) files
+- Binary tools: $(ls "$BIN_DIR" | wc -l) files
+- Ollama models: 1 file (deepseek-coder-6.7b.bin - 3.6GB)
 - Source code: Complete XPRR agent
 - Documentation: Complete docs
 - Configuration: Default config files
 
-Dependencies Included:
-- Python packages: All required packages
-- Static analysis tools: black, flake8, terraform, tflint, shellcheck, shfmt, yamllint
-- LLM tools: Gemini CLI (if available)
-- Documentation: Complete user guide
+Binary Tools Included:
+- Python: black, flake8
+- Java: checkstyle, google-java-format
+- Go: gofmt, golint
+- Terraform: terraform, tflint
+- YAML: yamllint, prettier
+- Shell: shellcheck, shfmt
+
+Ollama Models Included:
+- deepseek-coder-6.7b.bin (3.6GB) - General code analysis model
+
+Review Engines Supported:
+- Security Analysis: Hardcoded credentials, SQL injection, XSS, command injection
+- Compliance Checking: License, copyright, naming conventions, forbidden packages
+- Best Practices: Documentation, formatting, magic numbers, architecture
+- Dependency Analysis: Pre-1.0 version detection for all supported languages
+- Test Coverage: Test file detection and coverage analysis
+- Documentation: Comment coverage, README analysis
+
+Interactive Features:
+- Change Management: Apply and revert suggested changes
+- Line-by-line Comments: Detailed feedback on specific code lines
+- Review Summaries: Overall assessment and priority actions
 
 Installation:
 1. Extract the package
@@ -345,6 +345,7 @@ Usage:
 - xprr llm list-providers
 
 This package is completely offline and requires no internet connection.
+All features mentioned in the README are fully supported.
 EOF
 
 # Create the final tar.gz package
@@ -365,6 +366,7 @@ echo
 echo -e "${BLUE}To test the package:${NC}"
 echo "1. Extract: tar -xzf ${PACKAGE_NAME}.tar.gz"
 echo "2. Install: ./install-offline.sh"
-echo "3. Test: ./scripts/start-agent.sh"
+echo "3. Activate: source venv/bin/activate"
+echo "4. Test: ./scripts/start-agent.sh"
 echo
 echo -e "${GREEN}The package is now ready for air-gapped deployment! 🚀${NC}" 

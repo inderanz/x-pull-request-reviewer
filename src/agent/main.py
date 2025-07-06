@@ -416,10 +416,115 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
         click.echo(f"  Format: {results['format']}")
         click.echo(f"  Lint:   {results['lint']}")
 
-    # Prepare static summary string for LLM
+    # NEW: Run comprehensive review engines
+    click.echo("\n[INFO] Running comprehensive review engines...")
+    
+    # Security Analysis
+    try:
+        security_issues = security_issues_in_diff(diff, language)
+        if security_issues:
+            click.echo(f"\n[SECURITY] Found {len(security_issues)} security issues:")
+            for issue in security_issues:
+                click.echo(f"  ⚠️  {issue}")
+                log_audit(f"[SECURITY] {issue}")
+        else:
+            click.echo("[SECURITY] No security issues detected")
+    except Exception as e:
+        click.echo(f"[SECURITY] Error in security analysis: {e}")
+        log_audit(f"[ERROR] Security analysis failed: {e}")
+
+    # Compliance Analysis
+    try:
+        compliance_issues = compliance_issues_in_diff(diff, language)
+        if compliance_issues:
+            click.echo(f"\n[COMPLIANCE] Found {len(compliance_issues)} compliance issues:")
+            for issue in compliance_issues:
+                click.echo(f"  📋 {issue}")
+                log_audit(f"[COMPLIANCE] {issue}")
+        else:
+            click.echo("[COMPLIANCE] No compliance issues detected")
+    except Exception as e:
+        click.echo(f"[COMPLIANCE] Error in compliance analysis: {e}")
+        log_audit(f"[ERROR] Compliance analysis failed: {e}")
+
+    # Best Practices Analysis
+    try:
+        best_practice_issues = best_practices_in_diff(diff, language)
+        if best_practice_issues:
+            click.echo(f"\n[BEST PRACTICES] Found {len(best_practice_issues)} best practice issues:")
+            for issue in best_practice_issues:
+                click.echo(f"  💡 {issue}")
+                log_audit(f"[BEST PRACTICES] {issue}")
+        else:
+            click.echo("[BEST PRACTICES] No best practice issues detected")
+    except Exception as e:
+        click.echo(f"[BEST PRACTICES] Error in best practices analysis: {e}")
+        log_audit(f"[ERROR] Best practices analysis failed: {e}")
+
+    # Dependency Analysis
+    try:
+        dependency_issues = analyze_dependencies(repo_dir, language)
+        if dependency_issues:
+            click.echo(f"\n[DEPENDENCIES] Found {len(dependency_issues)} dependency issues:")
+            for issue in dependency_issues:
+                click.echo(f"  📦 {issue}")
+                log_audit(f"[DEPENDENCIES] {issue}")
+        else:
+            click.echo("[DEPENDENCIES] No dependency issues detected")
+    except Exception as e:
+        click.echo(f"[DEPENDENCIES] Error in dependency analysis: {e}")
+        log_audit(f"[ERROR] Dependency analysis failed: {e}")
+
+    # Test Coverage Analysis
+    try:
+        test_coverage_issues = analyze_test_coverage(repo_dir, language)
+        if test_coverage_issues:
+            click.echo(f"\n[TEST COVERAGE] Found {len(test_coverage_issues)} test coverage issues:")
+            for issue in test_coverage_issues:
+                click.echo(f"  🧪 {issue}")
+                log_audit(f"[TEST COVERAGE] {issue}")
+        else:
+            click.echo("[TEST COVERAGE] No test coverage issues detected")
+    except Exception as e:
+        click.echo(f"[TEST COVERAGE] Error in test coverage analysis: {e}")
+        log_audit(f"[ERROR] Test coverage analysis failed: {e}")
+
+    # Documentation Analysis
+    try:
+        documentation_issues = analyze_documentation(repo_dir, language)
+        if documentation_issues:
+            click.echo(f"\n[DOCUMENTATION] Found {len(documentation_issues)} documentation issues:")
+            for issue in documentation_issues:
+                click.echo(f"  📚 {issue}")
+                log_audit(f"[DOCUMENTATION] {issue}")
+        else:
+            click.echo("[DOCUMENTATION] No documentation issues detected")
+    except Exception as e:
+        click.echo(f"[DOCUMENTATION] Error in documentation analysis: {e}")
+        log_audit(f"[ERROR] Documentation analysis failed: {e}")
+
+    # Prepare comprehensive static summary string for LLM
     static_summary_str = "\n".join([
         f"{file}:\n  Format: {results['format']}\n  Lint: {results['lint']}" for file, results in summary.items()
     ])
+
+    # Add review engine results to summary
+    review_summaries = []
+    if security_issues:
+        review_summaries.append(f"Security Issues: {', '.join(security_issues)}")
+    if compliance_issues:
+        review_summaries.append(f"Compliance Issues: {', '.join(compliance_issues)}")
+    if best_practice_issues:
+        review_summaries.append(f"Best Practice Issues: {', '.join(best_practice_issues)}")
+    if dependency_issues:
+        review_summaries.append(f"Dependency Issues: {', '.join(dependency_issues)}")
+    if test_coverage_issues:
+        review_summaries.append(f"Test Coverage Issues: {', '.join(test_coverage_issues)}")
+    if documentation_issues:
+        review_summaries.append(f"Documentation Issues: {', '.join(documentation_issues)}")
+    
+    if review_summaries:
+        static_summary_str += "\n\nReview Engine Results:\n" + "\n".join(review_summaries)
 
     # Detect language (simple heuristic: use first file's extension)
     language = 'code'
@@ -554,6 +659,23 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
         log_audit(f"[ERROR] LLM/server error: {e}")
         print(f"[ERROR] LLM/server error: {e}")
         return
+
+    # NEW: Interactive Change Management
+    if interactive and all_line_comments:
+        try:
+            click.echo("\n[INFO] Starting interactive change management...")
+            # Create a comprehensive LLM response for change management
+            llm_response = f"Review Summary:\n{summary_comment}\n\nLine Comments:\n"
+            for _, _, comment in all_line_comments:
+                llm_response += f"- {comment}\n"
+            
+            # Run interactive change management
+            updated_review = interactive_change_management(change_manager, llm_response, repo_dir, diff)
+            click.echo(f"[INTERACTIVE] Change management completed. Updated review: {updated_review[:100]}...")
+            log_audit(f"[INTERACTIVE] Change management completed")
+        except Exception as e:
+            click.echo(f"[INTERACTIVE] Error in change management: {e}")
+            log_audit(f"[ERROR] Interactive change management failed: {e}")
 
     # Parse diff for actual changed lines and map LLM comments to real line numbers
     diff_lines = parse_unified_diff(diff)

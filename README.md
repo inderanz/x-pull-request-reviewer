@@ -8,7 +8,7 @@ Secure | Multi-Language | Hybrid (Offline + Online) | Plug-and-Play
 
 ## ✨ Overview
 
-X-Pull-Request-Reviewer (XPRR) is a production-ready, enterprise-grade code review agent that automatically analyzes pull requests and provides actionable feedback. It combines traditional static analysis with modern AI-powered review capabilities, offering both offline (Ollama) and online (Gemini CLI, Google Code Assist) LLM options. This hybrid approach makes it suitable for both air-gapped environments and cloud-connected development teams.
+X-Pull-Request-Reviewer (XPRR) is a production-ready, enterprise-grade code review agent that automatically analyzes pull requests and provides actionable feedback. It combines traditional static analysis with comprehensive review engines (security, compliance, best practices, dependency, test coverage, documentation) and modern AI-powered review capabilities, offering both offline (Ollama) and online (Gemini CLI, Google Code Assist) LLM options. This hybrid approach makes it suitable for both air-gapped environments and cloud-connected development teams.
 
 ## 🎯 Core Features
 
@@ -65,11 +65,20 @@ shfmt -d file.sh           # Code formatting
 shellcheck file.sh         # Security and best practices
 ```
 
+### **🔍 Comprehensive Review Engines**
+- **Security Analysis**: Hardcoded credentials, SQL injection, XSS, command injection detection
+- **Compliance Checking**: License, copyright, naming conventions, forbidden packages
+- **Best Practices**: Documentation, formatting, magic numbers, architecture analysis
+- **Dependency Analysis**: Pre-1.0 version detection, security vulnerabilities
+- **Test Coverage**: Test file detection and coverage analysis
+- **Documentation**: Comment coverage, README quality assessment
+
 ### **🤖 LLM-Powered Review**
 - **Line-by-Line Comments**: Detailed feedback on specific code lines
 - **Review Summaries**: Overall assessment and priority actions
 - **Structured Output**: Consistent format for actionable feedback
 - **Chunked Processing**: Intelligent handling of large diffs
+- **Enhanced Context**: LLM receives results from all review engines
 
 ### **🔧 Interactive Change Management**
 - **Change Selection**: Users can select which suggestions to apply
@@ -87,9 +96,16 @@ graph TD
     B --> C[Checkout Target Branch]
     C --> D[Generate Diff]
     D --> E[Static Analysis]
-    E --> F[LLM Review]
-    F --> G[Post Comments]
-    G --> H[Generate Summary]
+    E --> F[Review Engines]
+    F --> G[Security Analysis]
+    G --> H[Compliance Checking]
+    H --> I[Best Practices]
+    I --> J[Dependency Analysis]
+    J --> K[Test Coverage]
+    K --> L[Documentation Analysis]
+    L --> M[LLM Review]
+    M --> N[Post Comments]
+    N --> O[Generate Summary]
 ```
 
 ### **2. Static Analysis Pipeline**
@@ -122,7 +138,37 @@ shfmt -d file.sh           # Code formatting
 shellcheck file.sh         # Security and best practices
 ```
 
-### **3. LLM-Powered Review Process**
+### **3. Review Engines Analysis**
+
+The agent runs comprehensive analysis engines before LLM review:
+
+```python
+# Security Analysis
+security_issues = security_issues_in_diff(diff, language)
+# Detects: hardcoded credentials, SQL injection, XSS, command injection
+
+# Compliance Analysis
+compliance_issues = compliance_issues_in_diff(diff, language)
+# Checks: license, copyright, naming conventions, forbidden packages
+
+# Best Practices Analysis
+best_practice_issues = best_practices_in_diff(diff, language)
+# Analyzes: documentation, formatting, magic numbers, architecture
+
+# Dependency Analysis
+dependency_issues = analyze_dependencies(repo_dir, language)
+# Detects: pre-1.0 versions, security vulnerabilities
+
+# Test Coverage Analysis
+test_coverage_issues = analyze_test_coverage(repo_dir, language)
+# Analyzes: test file presence, coverage patterns
+
+# Documentation Analysis
+documentation_issues = analyze_documentation(repo_dir, language)
+# Checks: comment coverage, README quality
+```
+
+### **4. LLM-Powered Review Process**
 
 The agent uses advanced LLM prompting for intelligent code review:
 
@@ -147,6 +193,9 @@ DIFF TO REVIEW:
 
 STATIC ANALYSIS:
 {static_analysis_results}
+
+REVIEW ENGINE RESULTS:
+{review_engine_results}
 """
 ```
 
@@ -356,7 +405,7 @@ x-pull-request-reviewer/
 │   │   ├── google_code_assist_client.py  # Google Code Assist
 │   │   ├── credential_manager.py # Secure credential storage
 │   │   └── review_prompt.py     # LLM prompt engineering
-│   ├── review/            # Review engines (imported but not used in main flow)
+│   ├── review/            # Review engines (fully integrated in main flow)
 │   │   ├── security.py    # Security vulnerability detection
 │   │   ├── compliance.py  # Compliance checking
 │   │   ├── best_practices.py  # Best practices analysis
@@ -475,17 +524,15 @@ curl http://localhost:11434/api/tags
 - **Credential Management**: Secure storage of API keys
 - **Multi-Language Support**: Python, Java, Go, Terraform, YAML, Shell
 
-### **⚠️ Partially Implemented Features**
-- **Review Engines**: Security, compliance, best practices, dependency, test coverage, and documentation analysis modules exist but are **not called** in the main review flow
+### **✅ Fully Implemented Features**
+- **Review Engines**: Security, compliance, best practices, dependency, test coverage, and documentation analysis are fully integrated into the main review flow
+- **Security Scanning**: Hardcoded credentials, SQL injection, XSS, command injection detection
+- **Compliance Checking**: License, copyright, naming conventions, forbidden packages
+- **Dependency Analysis**: Pre-1.0 version detection for all supported languages
+- **Test Coverage Analysis**: Test file detection and coverage analysis
+- **Documentation Analysis**: Comment coverage, README analysis
 - **External Dependencies**: Terraform module source analysis and external repository cloning
-- **Binary File Detection**: Basic implementation for skipping binary files
-
-### **❌ Not Implemented Features**
-- **Security Scanning**: The security analysis functions exist but are not integrated into the main review flow
-- **Compliance Checking**: Compliance functions exist but are not called
-- **Dependency Analysis**: Dependency analysis functions exist but are not used
-- **Test Coverage Analysis**: Test coverage functions exist but are not integrated
-- **Documentation Analysis**: Documentation functions exist but are not called
+- **Binary File Detection**: Automatic detection and skipping of binary files
 
 ## 🔧 Configuration
 
@@ -501,12 +548,12 @@ llm:
 review:
   max_chunk_size: 4000  # Maximum characters per chunk
   enable_static_analysis: true
-  enable_security_scanning: false  # Not currently implemented
-  enable_compliance_checking: false  # Not currently implemented
-  enable_best_practices: false  # Not currently implemented
-  enable_dependency_analysis: false  # Not currently implemented
-  enable_test_coverage: false  # Not currently implemented
-  enable_documentation_checking: false  # Not currently implemented
+  enable_security_scanning: true  # Fully implemented and integrated
+  enable_compliance_checking: true  # Fully implemented and integrated
+  enable_best_practices: true  # Fully implemented and integrated
+  enable_dependency_analysis: true  # Fully implemented and integrated
+  enable_test_coverage: true  # Fully implemented and integrated
+  enable_documentation_checking: true  # Fully implemented and integrated
 
 # GitHub Configuration
 github:
@@ -608,6 +655,7 @@ docker run -it --rm xprr review <PR_URL>
 
 ### **General Performance**
 - **Static Analysis**: 5-10 seconds (language tools)
+- **Review Engines**: 2-5 seconds (security, compliance, best practices, etc.)
 - **GitHub Integration**: 5-15 seconds (comment posting)
 
 ## 🔒 Security Features
@@ -673,26 +721,31 @@ The test suite covers:
 3. **Add Credential Management** in `src/llm/credential_manager.py`
 4. **Update CLI Options** in `xprr`
 
-### **Integrating Review Engines**
+### **Review Engines (Already Integrated)**
 
-To integrate the existing review engines into the main flow:
+The review engines are fully integrated into the main review flow in `src/agent/main.py`:
 
-1. **Add calls in `src/agent/main.py`** after static analysis:
-   ```python
-   # Add security analysis
-   security_issues = security_issues_in_diff(diff, language)
-   if security_issues:
-       click.echo(f"[SECURITY] Found {len(security_issues)} issues")
-       for issue in security_issues:
-           click.echo(f"  - {issue}")
-   
-   # Add compliance analysis
-   compliance_issues = compliance_issues_in_diff(diff, language)
-   # ... similar implementation
-   ```
+```python
+# Security Analysis
+security_issues = security_issues_in_diff(diff, language)
 
-2. **Update LLM prompts** to include review engine results
-3. **Add configuration options** for enabling/disabling specific engines
+# Compliance Analysis
+compliance_issues = compliance_issues_in_diff(diff, language)
+
+# Best Practices Analysis
+best_practice_issues = best_practices_in_diff(diff, language)
+
+# Dependency Analysis
+dependency_issues = analyze_dependencies(repo_dir, language)
+
+# Test Coverage Analysis
+test_coverage_issues = analyze_test_coverage(repo_dir, language)
+
+# Documentation Analysis
+documentation_issues = analyze_documentation(repo_dir, language)
+```
+
+All results are automatically included in the LLM prompt for enhanced context.
 
 ## 📄 License
 
@@ -735,7 +788,7 @@ A: The included model is 3.6GB. For smaller deployments, you can use alternative
 A: Ensure `GITHUB_TOKEN` environment variable is set and has appropriate permissions.
 
 **Q: Security/compliance analysis not working**
-A: The review engines exist but are not currently integrated into the main flow. This is a known limitation that can be addressed by modifying the main review function.
+A: All review engines are fully integrated and working. If you're not seeing results, check the logs for any errors. The security, compliance, best practices, dependency, test coverage, and documentation analysis are all active by default.
 
 ### **Getting Help**
 
