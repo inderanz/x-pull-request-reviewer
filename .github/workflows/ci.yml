@@ -130,7 +130,7 @@ jobs:
         EOF
 
     - name: Upload security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-analysis-reports
         path: |
@@ -242,7 +242,7 @@ jobs:
         python -m build
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: dist
         path: dist/
@@ -274,7 +274,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Download security reports
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: security-analysis-reports
         path: security-reports/
