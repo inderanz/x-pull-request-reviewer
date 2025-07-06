@@ -232,6 +232,8 @@ export GOOGLE_APPLICATION_CREDENTIALS="path/to/service-account.json"
 # Model: codellama-trained-20250624_193347 (3.6GB)
 # Context Window: ~4,000 characters
 # Processing: Chunked for large diffs
+# 🚀 Auto-Server Management: Automatically starts Ollama server if not running
+# 📦 Bundled Binary: Ollama binary included in offline package for macOS
 ```
 
 ## 🚀 Installation & Setup
@@ -718,6 +720,16 @@ A: Check that your API key is correct and has the necessary permissions.
 
 **Q: Ollama model not found**
 A: Run `./xprr setup` to install the required model.
+
+**Q: Ollama server not starting**
+A: The agent automatically starts the Ollama server if it's not running. If you encounter issues:
+1. The offline package includes the Ollama binary for macOS - no installation needed
+2. If using the online version, install Ollama:
+   - **Official download**: https://ollama.ai/download
+   - **Homebrew**: `brew install ollama`
+   - **Install script**: `curl -fsSL https://ollama.ai/install.sh | sh`
+3. Check if Ollama is in your PATH: `which ollama`
+4. The agent will automatically detect and start the server on port 11434
 
 **Q: Permission denied on xprr script**
 A: Run `chmod +x xprr` to make it executable.

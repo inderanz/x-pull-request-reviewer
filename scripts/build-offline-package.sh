@@ -48,7 +48,7 @@ print_error() {
 }
 
 # Configuration
-PACKAGE_NAME="xprr-agent-macos-v1.0.0"
+PACKAGE_NAME="xprr-agent-macos-v1.2.0"
 BUILD_DIR="build"
 PACKAGES_DIR="$BUILD_DIR/packages"
 BIN_DIR="$BUILD_DIR/bin"
@@ -88,13 +88,32 @@ cp .gitignore "$BUILD_DIR/"
 
 # NEW: Copy existing binary tools (instead of downloading)
 print_status "Copying existing binary tools..."
-cp -r bin/* "$BIN_DIR/"
+if [ -d "bin" ] && [ "$(ls -A bin)" ]; then
+    cp -r bin/* "$BIN_DIR/"
+    print_success "Copied existing binary tools"
+else
+    print_warning "No existing binary tools found. Will download during installation."
+fi
 
 # NEW: Copy Ollama models (only deepseek-coder-6.7b.bin for size optimization)
 print_status "Copying Ollama models..."
 mkdir -p "$BUILD_DIR/ollama_models"
-cp ollama_models/deepseek-coder-6.7b.bin "$BUILD_DIR/ollama_models/"
-print_success "Copied deepseek-coder-6.7b.bin (3.6GB) for offline operation"
+
+# Copy deepseek-coder-6.7b.bin if available locally
+if [ -f "test-offline-package/build/ollama_models/deepseek-coder-6.7b.bin" ]; then
+    cp test-offline-package/build/ollama_models/deepseek-coder-6.7b.bin "$BUILD_DIR/ollama_models/"
+    print_success "Copied deepseek-coder-6.7b.bin (3.6GB) for offline operation"
+elif [ -f "ollama_models/deepseek-coder-6.7b.bin" ]; then
+    cp ollama_models/deepseek-coder-6.7b.bin "$BUILD_DIR/ollama_models/"
+    print_success "Copied deepseek-coder-6.7b.bin (3.6GB) for offline operation"
+else
+    print_warning "deepseek-coder-6.7b.bin not found locally. Will be downloaded during first use."
+fi
+
+# Note: The primary model codellama-trained-20250624_193347 is not available locally
+# Users will need to download it during first use or use the fallback model
+print_status "Note: Primary model codellama-trained-20250624_193347 will be downloaded during first use"
+print_status "Fallback model deepseek-coder-6.7b.bin is included in package for immediate offline operation"
 
 # Download Python wheels
 print_status "Downloading Python wheels..."
@@ -123,6 +142,27 @@ pip3 download flake8 -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-ve
 # YAML Lint
 print_status "Installing YAML Lint..."
 pip3 download yamllint -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
+
+# Download Ollama binary for macOS
+print_status "Downloading Ollama binary for macOS..."
+OLLAMA_VERSION="0.9.5"  # Latest stable version
+
+# Get the latest version from GitHub API
+LATEST_VERSION=$(curl -s "https://api.github.com/repos/ollama/ollama/releases/latest" | grep -o '"tag_name": "v[^"]*"' | cut -d'"' -f4 | sed 's/v//')
+if [ -n "$LATEST_VERSION" ]; then
+    OLLAMA_VERSION="$LATEST_VERSION"
+fi
+
+OLLAMA_DOWNLOAD_URL="https://github.com/ollama/ollama/releases/download/v${OLLAMA_VERSION}/ollama-darwin.tgz"
+OLLAMA_BINARY_PATH="$BIN_DIR/ollama"
+
+print_status "Downloading Ollama v${OLLAMA_VERSION} for macOS..."
+curl -L "$OLLAMA_DOWNLOAD_URL" -o "$BUILD_DIR/ollama-darwin.tgz"
+tar -xzf "$BUILD_DIR/ollama-darwin.tgz" -C "$BUILD_DIR/"
+cp "$BUILD_DIR/ollama" "$OLLAMA_BINARY_PATH"
+chmod +x "$OLLAMA_BINARY_PATH"
+rm -f "$BUILD_DIR/ollama-darwin.tgz" "$BUILD_DIR/ollama"
+print_success "Downloaded Ollama binary: $OLLAMA_BINARY_PATH"
 
 # Download Node.js and npm (if not available)
 print_status "Checking Node.js installation..."
@@ -153,7 +193,12 @@ fi
 
 # Make all binaries executable
 print_status "Making binaries executable..."
-chmod +x "$BIN_DIR"/*
+if [ -d "$BIN_DIR" ] && [ "$(ls -A $BIN_DIR)" ]; then
+    chmod +x "$BIN_DIR"/*
+    print_success "Made binaries executable"
+else
+    print_warning "No binaries to make executable"
+fi
 
 # Create offline installation script
 print_status "Creating offline installation script..."

@@ -118,20 +118,46 @@ if [ -z "$GITHUB_TOKEN" ]; then
   log "[WARN] GITHUB_TOKEN is not set. You will be prompted for it if needed."
 fi
 
-# --- Detect platform ---
+# --- Detect platform and find Ollama binary ---
 OS="$(uname -s)"
+OLLAMA_BIN=""
 if [[ "$OS" == "Darwin" ]]; then
-  OLLAMA_BIN="$OLLAMA_DIR/ollama-macos"
+  # First check for bundled binary in bin directory
+  if [ -x "$BIN_DIR/ollama" ]; then
+    OLLAMA_BIN="$BIN_DIR/ollama"
+    log "Using bundled Ollama binary: $OLLAMA_BIN"
+  # Then check for system-wide installation
+  elif command -v ollama &> /dev/null; then
+    OLLAMA_BIN="$(command -v ollama)"
+    log "Using system Ollama: $OLLAMA_BIN"
+  fi
 elif [[ "$OS" == "Linux" ]]; then
-  OLLAMA_BIN="$OLLAMA_DIR/ollama-linux"
+  if [ -x "$BIN_DIR/ollama" ]; then
+    OLLAMA_BIN="$BIN_DIR/ollama"
+    log "Using bundled Ollama binary: $OLLAMA_BIN"
+  elif command -v ollama &> /dev/null; then
+    OLLAMA_BIN="$(command -v ollama)"
+    log "Using system Ollama: $OLLAMA_BIN"
+  fi
 else
   fail "Unsupported OS: $OS"
 fi
 
+if [ -z "$OLLAMA_BIN" ]; then
+  echo -e "\033[1;31m[ERROR] Ollama binary not found!\033[0m"
+  echo -e "\033[1;33mTo use Ollama features, please install Ollama:\033[0m"
+  echo -e "\033[1;34m  • Official download: https://ollama.ai/download\033[0m"
+  echo -e "\033[1;34m  • Homebrew: brew install ollama\033[0m"
+  echo -e "\033[1;34m  • Install script: curl -fsSL https://ollama.ai/install.sh | sh\033[0m"
+  echo -e "\033[1;34m  • GitHub releases: https://github.com/ollama/ollama/releases\033[0m"
+  echo -e "\033[1;34mAfter installing, rerun this script.\033[0m"
+  OLLAMA_AVAILABLE=false
+fi
+
 # --- Start Ollama if not running ---
-if [ "$OLLAMA_AVAILABLE" = true ]; then
+if [ "$OLLAMA_AVAILABLE" = true ] && [ -n "$OLLAMA_BIN" ]; then
   if ! pgrep -f "$OLLAMA_BIN serve" > /dev/null; then
-    log "Starting Ollama server..."
+    log "Starting Ollama server using $OLLAMA_BIN ..."
     nohup "$OLLAMA_BIN" serve --model-path "$OLLAMA_MODELS_DIR" --port $OLLAMA_PORT > "$LOGS_DIR/ollama.log" 2>&1 &
     echo $! > "$OLLAMA_PID_FILE"
     sleep 5
@@ -141,12 +167,14 @@ if [ "$OLLAMA_AVAILABLE" = true ]; then
 
   # --- Check Ollama health ---
   if ! curl -s "http://localhost:$OLLAMA_PORT/api/tags" > /dev/null; then
+    echo -e "\033[1;31m[ERROR] Ollama did not start correctly. Check $LOGS_DIR/ollama.log\033[0m"
     log "[WARNING] Ollama did not start correctly. Check $LOGS_DIR/ollama.log"
   else
     log "Ollama server is healthy."
   fi
-else
-  log "Skipping Ollama startup (models not available)."
+elif [ "$OLLAMA_AVAILABLE" = false ]; then
+  echo -e "\033[1;33m[WARNING] Skipping Ollama startup (models not available or binary missing).\033[0m"
+  log "Skipping Ollama startup (models not available or binary missing)."
 fi
 
 # --- Setup Python venv ---

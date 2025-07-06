@@ -2,11 +2,24 @@ import requests
 import os
 import json
 import re
+import subprocess
+import time
+import socket
+import threading
+import logging
+import shutil
+from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 OLLAMA_HOST = os.environ.get('LLM_HOST', 'http://localhost')
 OLLAMA_PORT = os.environ.get('LLM_PORT', '11434')
 OLLAMA_MODEL = os.environ.get('LLM_MODEL', 'codellama')
 OLLAMA_URL = f"{OLLAMA_HOST}:{OLLAMA_PORT}/api/generate"
+
+# Global variable to track if we've started Ollama server
+_ollama_server_started = False
+_ollama_process = None
 
 PROMPT_MAX_CHARS = 4000  # Further reduce prompt size
 
@@ -24,6 +37,141 @@ SUMMARY: Overall, the code is well-structured but needs better error handling.
 DIFF:
 {diff}
 '''
+
+
+def is_port_open(host, port, timeout=1):
+    """Check if a port is open and accepting connections."""
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        result = sock.connect_ex((host, int(port)))
+        sock.close()
+        return result == 0
+    except Exception:
+        return False
+
+
+def find_ollama_executable():
+    """Find the Ollama executable in common locations."""
+    possible_paths = [
+        "ollama",  # If in PATH
+        "/usr/local/bin/ollama",
+        "/opt/homebrew/bin/ollama",  # macOS Homebrew
+        str(Path.home() / ".local/bin/ollama"),
+        str(Path.home() / "bin/ollama"),
+    ]
+    
+    for path in possible_paths:
+        if shutil.which(path):
+            return path
+    
+    # Try to find in PATH
+    ollama_path = shutil.which("ollama")
+    if ollama_path:
+        return ollama_path
+    
+    return None
+
+
+def start_ollama_server():
+    """Start the Ollama server if it's not already running."""
+    global _ollama_server_started, _ollama_process
+    
+    if _ollama_server_started:
+        return True
+    
+    # Check if Ollama is already running
+    host = OLLAMA_HOST.replace('http://', '').replace('https://', '')
+    if is_port_open(host, OLLAMA_PORT):
+        logger.info("Ollama server is already running")
+        _ollama_server_started = True
+        return True
+    
+    # Find Ollama executable
+    ollama_path = find_ollama_executable()
+    if not ollama_path:
+        logger.error("Ollama executable not found. Please install Ollama first.")
+        print("[ERROR] Ollama executable not found. Please install Ollama first.")
+        print("[INFO] Download from: https://ollama.ai/download")
+        return False
+    
+    try:
+        logger.info(f"Starting Ollama server from: {ollama_path}")
+        print("[INFO] Starting Ollama server...")
+        
+        # Start Ollama server in background
+        _ollama_process = subprocess.Popen(
+            [ollama_path, "serve"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            preexec_fn=os.setsid if hasattr(os, 'setsid') else None
+        )
+        
+        # Wait for server to start
+        max_wait_time = 30  # seconds
+        wait_interval = 1   # seconds
+        waited_time = 0
+        
+        while waited_time < max_wait_time:
+            if is_port_open(host, OLLAMA_PORT):
+                logger.info("Ollama server started successfully")
+                print("[SUCCESS] Ollama server started successfully")
+                _ollama_server_started = True
+                return True
+            
+            time.sleep(wait_interval)
+            waited_time += wait_interval
+            
+            # Check if process is still running
+            if _ollama_process.poll() is not None:
+                stdout, stderr = _ollama_process.communicate()
+                logger.error(f"Ollama server failed to start. Exit code: {_ollama_process.returncode}")
+                logger.error(f"stdout: {stdout}")
+                logger.error(f"stderr: {stderr}")
+                print(f"[ERROR] Ollama server failed to start. Exit code: {_ollama_process.returncode}")
+                return False
+        
+        logger.error("Ollama server failed to start within timeout")
+        print("[ERROR] Ollama server failed to start within timeout")
+        return False
+        
+    except Exception as e:
+        logger.error(f"Failed to start Ollama server: {e}")
+        print(f"[ERROR] Failed to start Ollama server: {e}")
+        return False
+
+
+def ensure_ollama_server():
+    """Ensure Ollama server is running, start it if necessary."""
+    if not _ollama_server_started:
+        return start_ollama_server()
+    return True
+
+
+def stop_ollama_server():
+    """Stop the Ollama server if we started it."""
+    global _ollama_server_started, _ollama_process
+    
+    if _ollama_process and _ollama_process.poll() is None:
+        try:
+            logger.info("Stopping Ollama server...")
+            _ollama_process.terminate()
+            _ollama_process.wait(timeout=10)
+            logger.info("Ollama server stopped")
+        except subprocess.TimeoutExpired:
+            logger.warning("Ollama server did not stop gracefully, forcing...")
+            _ollama_process.kill()
+        except Exception as e:
+            logger.error(f"Error stopping Ollama server: {e}")
+    
+    _ollama_server_started = False
+    _ollama_process = None
+
+
+# Register cleanup function to be called on exit
+import atexit
+atexit.register(stop_ollama_server)
 
 
 def summarize_diff(diff, max_chars=2000):
@@ -121,6 +269,10 @@ def query_ollama_for_review(prompt, diff):
     """
     Query Ollama for code review with improved parsing
     """
+    # Ensure Ollama server is running
+    if not ensure_ollama_server():
+        return [], "Error: Failed to start Ollama server"
+    
     model = os.environ.get('LLM_MODEL', 'codellama-trained-20250624_193347:latest')
     print(f"[LLM DEBUG] Using model: {model}")
     
@@ -205,6 +357,10 @@ def query_ollama_for_review(prompt, diff):
 
 def query_ollama(prompt, model=None):
     """Send a prompt to the Ollama server and return the response text. Truncate if too large."""
+    # Ensure Ollama server is running
+    if not ensure_ollama_server():
+        return f"[ERROR] Failed to start Ollama server"
+    
     model = model or OLLAMA_MODEL
     prompt_len = len(prompt)
     if prompt_len > PROMPT_MAX_CHARS:

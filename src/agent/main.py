@@ -19,6 +19,7 @@ import shutil
 import glob
 import mimetypes
 import time
+import sys
 
 
 def extract_repo_url_from_pr_url(pr_url):
@@ -756,4 +757,111 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
                 # Optionally, run LLM review on module code (can be extended)
                 print(f"[INFO] External module review complete: {mod_path}")
 
-    click.echo("[INFO] Review complete. No PR/branch actions taken by agent. User must approve/merge in VSCode or GitHub UI.") 
+    click.echo("[INFO] Review complete. No PR/branch actions taken by agent. User must approve/merge in VSCode or GitHub UI.")
+
+
+@click.command()
+@click.option('--pr', 'pr_url', type=str, help='GitHub PR link to review')
+@click.option('--repo', 'repo_path', type=str, help='Path to local repo')
+@click.option('--branch', type=str, help='Branch to review')
+@click.option('--pr-number', type=int, help='Pull request number (for posting comments)')
+@click.option('--repo-slug', type=str, help='GitHub repo in org/repo format (for posting comments)')
+@click.option('--no-interactive', is_flag=True, help='Disable interactive change management (useful for CI/CD)')
+@click.option('--provider', type=click.Choice(['ollama', 'google_code_assist', 'gemini_cli']), help='LLM provider to use for the review')
+@click.option('--help', is_flag=True, help='Show this message and exit.')
+def review(pr_url, repo_path, branch, pr_number, repo_slug, no_interactive, provider, help):
+    """Review a pull request or branch. Optionally post LLM review as PR comment if --pr-number and --repo-slug are provided."""
+    if help:
+        click.echo("\nUsage: xprr review [OPTIONS]\n")
+        click.echo("  Review a pull request or branch. Optionally post LLM review as PR comment if --pr-number and --repo-slug are provided.\n")
+        click.echo("  The review now includes interactive change management where you can: - Apply specific suggested changes - Revert applied changes if needed - Selectively ignore certain recommendations\n")
+        click.echo("  Required GitHub token scopes: repo (for private repos), public_repo (for public repos), and write:discussion for comments.\n")
+        click.echo("\nOptions:")
+        click.echo("  --pr TEXT                       GitHub PR link to review")
+        click.echo("  --repo TEXT                     Path to local repo")
+        click.echo("  --branch TEXT                   Branch to review")
+        click.echo("  --pr-number INTEGER             Pull request number (for posting comments)")
+        click.echo("  --repo-slug TEXT                GitHub repo in org/repo format (for posting comments)")
+        click.echo("  --no-interactive                Disable interactive change management (useful for CI/CD)")
+        click.echo("  --provider [ollama|google_code_assist|gemini_cli]  LLM provider to use for the review")
+        click.echo("  --help                          Show this message and exit.")
+        sys.exit(0)
+
+    # Handle PR URL and prompt for cloning
+    if pr_url and not repo_path:
+        repo_url = extract_repo_url_from_pr_url(pr_url)
+        if not repo_url:
+            click.echo(f"[ERROR] Could not extract repository URL from PR URL: {pr_url}")
+            sys.exit(1)
+        click.echo(f"[INFO] PR URL detected. Repository: {repo_url}")
+        resp = click.prompt("Do you want to clone the repository for this PR review? [Y/n]", default="Y")
+        if resp.strip().lower() in ["y", "yes", ""]:
+            # Clone the repo if not already present
+            dest_dir = os.path.join('workspace', os.path.basename(repo_url.rstrip('/').replace('.git', '')))
+            if not os.path.exists(dest_dir):
+                try:
+                    git_utils.clone_repo(repo_url, dest_dir)
+                except Exception as e:
+                    click.echo(f"[ERROR] Failed to clone repository: {e}")
+                    sys.exit(1)
+            repo_path = dest_dir
+            # Fetch PR metadata and checkout PR branch
+            from ..github.pr_client import get_pr_metadata
+            org_repo = repo_url.split('github.com/')[-1].replace('.git', '')
+            pr_number = int(pr_url.rstrip('/').split('/')[-1])
+            pr_meta = get_pr_metadata(org_repo, pr_number)
+            if not pr_meta:
+                click.echo(f"[ERROR] Could not fetch PR metadata for {org_repo}#{pr_number}")
+                sys.exit(1)
+            base_branch = pr_meta['base_branch']
+            branch = pr_meta['head_branch']
+            click.echo(f"[INFO] PR base branch: {base_branch}, head branch: {branch}")
+        else:
+            repo_path = click.prompt("Enter the path to your local clone of the repository", type=str)
+            if not os.path.exists(repo_path):
+                click.echo(f"[ERROR] Provided path does not exist: {repo_path}")
+                sys.exit(1)
+
+    # LLM provider selection
+    from ..llm.unified_client import get_llm_client
+    client = get_llm_client()
+    available_providers = client.get_available_providers()
+    enabled_providers = [p for p, ok in available_providers.items() if ok]
+    if not provider:
+        if len(enabled_providers) == 0:
+            click.echo("[ERROR] No LLM providers are available. Please configure at least one provider.")
+            sys.exit(1)
+        elif len(enabled_providers) == 1:
+            provider = enabled_providers[0]
+            click.echo(f"[INFO] Only one LLM provider available: {provider}")
+        else:
+            click.echo("Multiple LLM providers detected:")
+            for idx, p in enumerate(enabled_providers, 1):
+                click.echo(f"  {idx}. {p}")
+            sel = click.prompt(f"Select provider [1-{len(enabled_providers)}]", type=int, default=1)
+            provider = enabled_providers[sel-1]
+    else:
+        if provider not in enabled_providers:
+            click.echo(f"[ERROR] Selected provider '{provider}' is not available. Available: {enabled_providers}")
+            sys.exit(1)
+
+    # Prompt for Gemini CLI key if needed
+    if provider == "gemini_cli":
+        from ..llm.credential_manager import get_credential_manager
+        cred_mgr = get_credential_manager()
+        if not cred_mgr.get_credential("gemini_cli", "api_key"):
+            click.echo("Gemini CLI API key not found.")
+            cred_mgr.prompt_for_credentials("gemini_cli")
+
+    # Run the review
+    review_pr_or_branch(
+        repo_url=None,  # Already handled
+        repo_path=repo_path,
+        branch=branch,
+        base_branch=None,
+        pr_number=pr_number,
+        repo_slug=repo_slug,
+        interactive=not no_interactive,
+        plugins=None,
+        provider=provider
+    ) 

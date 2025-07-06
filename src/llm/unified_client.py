@@ -62,6 +62,12 @@ class UnifiedLLMClient:
             os.environ['LLM_HOST'] = host
             os.environ['LLM_PORT'] = port
             os.environ['LLM_MODEL'] = model
+            
+            # Ensure Ollama server is running
+            from .ollama_client import ensure_ollama_server
+            if not ensure_ollama_server():
+                logger.error("Failed to start Ollama server")
+                print("[ERROR] Failed to start Ollama server")
     
     def query_for_review(self, prompt: str, diff: str, file_path: Optional[str] = None) -> Tuple[List[Tuple], str]:
         """
@@ -106,6 +112,12 @@ class UnifiedLLMClient:
         
         try:
             if self.provider == "ollama":
+                # Ensure Ollama server is running first
+                from .ollama_client import ensure_ollama_server
+                if not ensure_ollama_server():
+                    logger.error("Failed to start Ollama server for connection test")
+                    return False
+                
                 # For Ollama, we'll do a simple test query
                 test_prompt = "Please respond with 'OK' if you can see this message."
                 test_diff = "This is a test diff for connection testing."
