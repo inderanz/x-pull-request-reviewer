@@ -145,7 +145,7 @@ fi
 print_status "Copying Gemini CLI offline package..."
 if [ -f "test-offline-package/gemini-cli/google-gemini-cli-0.1.7.tgz" ]; then
     cp "test-offline-package/gemini-cli/google-gemini-cli-0.1.7.tgz" "$GEMINI_CLI_DIR/"
-    print_success "Gemini CLI offline package copied (complete offline package with all dependencies)"
+    print_success "Gemini CLI offline package copied (installation will be skipped due to dependency issues)"
 else
     print_warning "Gemini CLI offline package not found. Creating empty directory."
     mkdir -p "$GEMINI_CLI_DIR"

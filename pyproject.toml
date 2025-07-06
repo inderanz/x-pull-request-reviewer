@@ -145,18 +145,4 @@ module = [
     "test_*",
 ]
 disallow_untyped_defs = false
-disallow_incomplete_defs = false
-
-[tool.bandit]
-exclude_dirs = ["tests", "venv", "test-offline-package", "build"]
-skips = ["B101", "B601"]  # Skip assert_used and mako_templates
-targets = ["src"]
-
-[tool.bandit.assert_used]
-skips = ["*_test.py", "*/test_*.py", "*/tests/*"]
-
-[tool.bandit.b101]
-skips = ["*_test.py", "*/test_*.py", "*/tests/*"]
-
-[tool.bandit.b601]
-skips = ["*_test.py", "*/test_*.py", "*/tests/*"] 
+disallow_incomplete_defs = false 
