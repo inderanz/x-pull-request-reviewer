@@ -14,7 +14,7 @@ BANNER = r"""
 print(BANNER)
 
 import click
-from .agent.main import review_pr_or_branch
+from .agent.main import review_pr_or_branch, extract_repo_url_from_pr_url
 from .llm.doc_scraper import DocumentationScraper, create_sample_training_data
 import json
 import os
@@ -91,20 +91,28 @@ def review(pr, repo, branch, pr_number, repo_slug, no_interactive, provider):
     try:
         log_audit(f"[REVIEW] Starting review: pr={pr}, repo={repo}, branch={branch}, pr_number={pr_number}, repo_slug={repo_slug}, provider={provider or 'default'}")
         
-        # Import the main review function that handles PR URLs properly
-        from .agent.main import review as main_review
+        # Handle PR URL properly
+        if pr and pr.startswith('http'):
+            # Extract repository URL from PR URL
+            repo_url = extract_repo_url_from_pr_url(pr)
+            if not repo_url:
+                log_audit(f"[ERROR] Could not extract repository URL from PR URL: {pr}")
+                print(f"[ERROR] Could not extract repository URL from PR URL: {pr}")
+                return
+        else:
+            repo_url = repo
         
-        # Call the main review function which handles PR URL parsing
-        main_review.callback(
-            pr_url=pr,
-            repo_path=repo,
-            branch=branch,
-            pr_number=pr_number,
+        review_pr_or_branch(
+            repo_url=repo_url, 
+            repo_path=repo, 
+            branch=branch, 
+            base_branch=None, 
+            pr_number=pr_number, 
             repo_slug=repo_slug,
-            no_interactive=no_interactive,
+            interactive=interactive,
+            plugins=plugins,
             provider=provider
         )
-        
         log_audit(f"[REVIEW] Completed review: pr={pr}, repo={repo}, branch={branch}, pr_number={pr_number}, repo_slug={repo_slug}")
     except Exception as e:
         log_audit(f"[ERROR] Review failed: {e}")
