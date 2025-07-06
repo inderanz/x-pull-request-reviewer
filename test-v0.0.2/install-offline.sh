@@ -160,16 +160,25 @@ setup_python_env() {
         print_status "Using existing virtual environment"
     fi
     
-    # Activate venv
+    # Activate venv and verify it's working
     source venv/bin/activate
+    
+    # Verify pip is available
+    if ! command -v pip &> /dev/null; then
+        print_error "pip not found in virtual environment"
+        print_status "Trying to reinstall virtual environment..."
+        rm -rf venv
+        python3 -m venv venv
+        source venv/bin/activate
+    fi
     
     # Upgrade pip
     print_status "Upgrading pip..."
-    pip install --upgrade pip --no-index --find-links=packages
+    python -m pip install --upgrade pip --no-index --find-links=packages
     
     # Install Python wheels
     print_status "Installing Python dependencies..."
-    pip install --no-index --find-links=packages -r requirements.txt
+    python -m pip install --no-index --find-links=packages -r requirements.txt
     
     print_success "Python environment setup complete"
 }
@@ -348,6 +357,9 @@ EOF
 # Function to run post-installation tests
 run_tests() {
     print_step "Running post-installation tests..."
+    
+    # Ensure virtual environment is activated
+    source venv/bin/activate
     
     # Test Python environment
     if python -c "import click, git, requests, yaml" 2>/dev/null; then
