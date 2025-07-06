@@ -747,6 +747,39 @@ documentation_issues = analyze_documentation(repo_dir, language)
 
 All results are automatically included in the LLM prompt for enhanced context.
 
+## 🔒 Security
+
+For detailed information about our security practices, tools, and procedures, see our [Security Policy](SECURITY.md).
+
+### **Security Scanning**
+
+XPRR includes comprehensive security scanning with multiple tools:
+
+- **🔍 Bandit**: Python security linting for common vulnerabilities
+- **🛡️ Safety**: Dependency vulnerability checking
+- **🔎 pip-audit**: Additional vulnerability scanning
+- **🚨 Semgrep**: Advanced security pattern matching
+- **📊 Static Analysis**: Code quality and formatting checks
+
+### **Local Security Scan**
+
+Run security scans locally before submitting PRs:
+
+```bash
+# Install security tools
+./scripts/security-scan.sh --install
+
+# Run security scan
+./scripts/security-scan.sh
+```
+
+### **Automated Security**
+
+- **CI/CD Integration**: Security scans run on every PR and push
+- **Weekly Scans**: Automated weekly security assessments
+- **PR Comments**: Automatic security status comments
+- **README Updates**: Security status automatically updated in README
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

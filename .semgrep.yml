@@ -1,0 +1,97 @@
+rules:
+  # Python security rules
+  - id: python.security.audit.avoid-assert
+    pattern: assert $X
+    message: "Avoid using assert statements in production code"
+    severity: WARNING
+    languages: [python]
+
+  - id: python.security.audit.avoid-eval
+    pattern: eval($X)
+    message: "Avoid using eval() as it can execute arbitrary code"
+    severity: ERROR
+    languages: [python]
+
+  - id: python.security.audit.avoid-exec
+    pattern: exec($X)
+    message: "Avoid using exec() as it can execute arbitrary code"
+    severity: ERROR
+    languages: [python]
+
+  - id: python.security.audit.avoid-os-system
+    pattern: os.system($X)
+    message: "Avoid using os.system() as it can execute arbitrary commands"
+    severity: ERROR
+    languages: [python]
+
+  - id: python.security.audit.avoid-subprocess-shell
+    pattern: subprocess.run(..., shell=True, ...)
+    message: "Avoid using shell=True in subprocess as it can execute arbitrary commands"
+    severity: ERROR
+    languages: [python]
+
+  - id: python.security.audit.avoid-pickle
+    pattern: pickle.loads($X)
+    message: "Avoid using pickle.loads() as it can execute arbitrary code"
+    severity: ERROR
+    languages: [python]
+
+  - id: python.security.audit.avoid-yaml-load
+    pattern: yaml.load($X)
+    message: "Use yaml.safe_load() instead of yaml.load() to prevent code execution"
+    severity: ERROR
+    languages: [python]
+
+  - id: python.security.audit.avoid-json-loads
+    pattern: json.loads($X)
+    message: "Be careful with json.loads() on untrusted input"
+    severity: WARNING
+    languages: [python]
+
+  - id: python.security.audit.avoid-requests-verify-false
+    pattern: requests.get(..., verify=False, ...)
+    message: "Avoid disabling SSL verification in requests"
+    severity: ERROR
+    languages: [python]
+
+  - id: python.security.audit.avoid-urllib-request
+    pattern: urllib.request.urlopen($X)
+    message: "Be careful with urllib.request.urlopen() on untrusted URLs"
+    severity: WARNING
+    languages: [python]
+
+  # XPRR specific rules
+  - id: xprr.security.audit.avoid-hardcoded-credentials
+    pattern: |
+      password = "..."
+      api_key = "..."
+      secret = "..."
+      token = "..."
+    message: "Avoid hardcoding credentials in source code"
+    severity: ERROR
+    languages: [python]
+
+  - id: xprr.security.audit.avoid-unsafe-file-operations
+    pattern: |
+      open($X, "w")
+      with open($X, "w") as f:
+    message: "Be careful with file write operations, ensure proper path validation"
+    severity: WARNING
+    languages: [python]
+
+  - id: xprr.security.audit.avoid-unsafe-subprocess
+    pattern: |
+      subprocess.run([$X, ...])
+      subprocess.Popen([$X, ...])
+    message: "Be careful with subprocess calls, ensure proper input validation"
+    severity: WARNING
+    languages: [python]
+
+# Exclude test files and build artifacts
+exclude:
+  - "tests/"
+  - "venv/"
+  - "test-offline-package/"
+  - "build/"
+  - "*.pyc"
+  - "__pycache__/" 
