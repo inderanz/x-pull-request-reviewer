@@ -269,6 +269,37 @@ Enter your choice: 1,3  # Apply changes 1 and 3
     - Set: `export GEMINI_API_KEY="YOUR_GEMINI_API_KEY"`
   - Use `./xprr setup-gemini` for interactive setup.
 
+## 🌟 Why Gemini CLI is Great
+
+### **🚀 Free Tier Benefits**
+- **100 requests per day** using Gemini 2.5 Pro at no cost
+- **No credit card required** for free tier usage
+- **Perfect for testing and small teams** without upfront costs
+
+### **💪 Advanced Features**
+- **Model Control**: Choose between Gemini 1.5 Flash, 2.5 Pro, and other models
+- **Higher Rate Limits**: Scale up with paid plans for enterprise usage
+- **1M+ Token Context**: Handle large diffs without chunking
+- **Real-time Processing**: Faster review times (15-30 seconds vs 30-45 seconds)
+- **Enterprise Security**: Google's enterprise-grade security and compliance
+
+### **🔧 Developer Experience**
+- **Official CLI Tool**: First-party support from Google
+- **Easy Authentication**: Simple API key or Google Cloud Project setup
+- **Reliable Infrastructure**: Google's global infrastructure with 99.9%+ uptime
+- **Future-Proof**: Access to latest model updates and features
+
+### **📊 Cost Comparison**
+| Feature | Ollama (Offline) | Gemini CLI (Online) |
+|---------|------------------|---------------------|
+| Setup Cost | Free | Free tier available |
+| Daily Usage | Unlimited | 100 requests/day (free) |
+| Model Updates | Manual | Automatic |
+| Infrastructure | Self-hosted | Google Cloud |
+| Context Window | ~4K chars | 1M+ tokens |
+
+**Learn More**: [Gemini API Documentation](https://ai.google.dev/docs) | [Pricing Details](https://ai.google.dev/pricing)
+
 ## 🚀 Usage Examples
 
 ```bash
