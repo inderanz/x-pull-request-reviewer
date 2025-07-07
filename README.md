@@ -47,63 +47,6 @@ flowchart TD
 
 ---
 
-## 🆕 What's New in v0.0.1-beta
-
-- **Filter Modes for Line Comments:**  
-  Use `--filter-mode` to control where comments are posted:
-  | Mode         | Description                                      |
-  |--------------|--------------------------------------------------|
-  | added        | (Default) Only on added lines in the diff        |
-  | diff_context | Also on lines near the diff (±N lines)           |
-  | file         | Anywhere in changed files                        |
-  | nofilter     | Anywhere in the repo (least strict)              |
-
-- **Multi-line Comment Support:**  
-  The agent can post comments spanning multiple lines if the LLM provides a range.
-
-- **Robust Line Mapping:**  
-  Comments are only posted to valid, added lines in the latest commit, preventing GitHub API errors.
-
-- **Backward Compatibility:**  
-  All previous CLI usage and workflows are preserved. New features are opt-in and have safe defaults.
-
-- **Enhanced Error Handling:**  
-  Improved logging and fallback to general PR comments if line mapping fails.
-
----
-
-## ⚡ Quick Start (v0.0.1-beta)
-
-1. **Download and extract the offline package:**
-   ```bash
-   gsutil cp gs://x-agents/xprr-agent-macos-v0.0.1-beta.tar.gz .
-   tar -xzf xprr-agent-macos-v0.0.1-beta.tar.gz
-   cd xprr-agent-macos-v0.0.1-beta
-   ```
-2. **Run the installer:**
-   ```bash
-   ./install-offline.sh
-   ```
-3. **Activate the Python environment:**
-   ```bash
-   source venv/bin/activate
-   ```
-4. **Authenticate Gemini CLI (if using online LLM):**
-   ```bash
-   ./xprr setup-gemini
-   # Or manually set GEMINI_API_KEY or GOOGLE_CLOUD_PROJECT
-   ```
-5. **Review a pull request:**
-   ```bash
-   ./xprr review <PR_URL>
-   # For offline review:
-   ./xprr review <PR_URL> --provider ollama
-   # With custom filter mode and context lines:
-   ./xprr review <PR_URL> --filter-mode diff_context --context-lines 5
-   ```
-
----
-
 ## 🎯 Core Features
 
 ### **🤖 Multi-LLM Provider Support (Hybrid Architecture)**
@@ -388,6 +331,26 @@ x-pull-request-reviewer/
 ## 📄 License
 
 MIT License. See [LICENSE](LICENSE).
+
+## 🆕 What's New in v0.0.1-beta
+
+- **Filter Modes for Line Comments:**  
+  Use `--filter-mode` to control where comments are posted:
+  | Mode         | Description                                      |
+  |--------------|--------------------------------------------------|
+  | added        | (Default) Only on added lines in the diff        |
+  | diff_context | Also on lines near the diff (±N lines)           |
+  | file         | Anywhere in changed files                        |
+  | nofilter     | Anywhere in the repo (least strict)              |
+
+- **Multi-line Comment Support:**  
+  The agent can post comments spanning multiple lines if the LLM provides a range.
+
+- **Robust Line Mapping:**  
+  Comments are only posted to valid, added lines in the latest commit, preventing GitHub API errors.
+
+- **Enhanced Error Handling:**  
+  Improved logging and fallback to general PR comments if line mapping fails.
 
 ---
 
