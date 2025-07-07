@@ -47,7 +47,7 @@ flowchart TD
 
 ---
 
-## 🆕 What's New in v0.0.1-alpha
+## 🆕 What's New in v0.0.1-beta
 
 - **Filter Modes for Line Comments:**  
   Use `--filter-mode` to control where comments are posted:
@@ -72,12 +72,13 @@ flowchart TD
 
 ---
 
-## ⚡ Quick Start (v0.0.1-alpha)
+## ⚡ Quick Start (v0.0.1-beta)
 
-1. **Extract the offline package:**
+1. **Download and extract the offline package:**
    ```bash
-   tar -xzf xprr-agent-macos-v0.0.1-alpha.tar.gz
-   cd xprr-agent-macos-v0.0.1-alpha
+   gsutil cp gs://x-agents/xprr-agent-macos-v0.0.1-beta.tar.gz .
+   tar -xzf xprr-agent-macos-v0.0.1-beta.tar.gz
+   cd xprr-agent-macos-v0.0.1-beta
    ```
 2. **Run the installer:**
    ```bash
