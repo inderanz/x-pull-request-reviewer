@@ -18,7 +18,7 @@ def read_requirements():
 
 setup(
     name="x-pull-request-reviewer",
-    version="0.1.1",
+    version="0.0.1",
     author="Inder Chauhan",
     author_email="inder@anzx.ai",
     description="Enterprise-Grade, Offline, LLM-Powered Code Review Agent",

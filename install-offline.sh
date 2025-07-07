@@ -178,7 +178,18 @@ setup_python_env() {
     
     # Install Python wheels
     print_status "Installing Python dependencies..."
-    python -m pip install --no-index --find-links=packages -r requirements.txt
+    if ! python -m pip install --no-index --find-links=packages -r requirements.txt; then
+        print_error "Some required Python packages could not be installed from the offline bundle."
+        print_error "Attempting to build missing wheels locally..."
+        if python3 scripts/build_missing_wheels.py; then
+            print_success "Missing wheels built. Please re-run the offline installer to complete installation."
+            exit 1
+        else
+            print_error "Failed to build all missing wheels. Please run scripts/build_missing_wheels.py on a different machine or Python version matching the missing wheel's requirements."
+            print_error "Once all wheels are present in the packages/ directory, re-run the offline installer."
+            exit 1
+        fi
+    fi
     
     print_success "Python environment setup complete"
 }

@@ -115,17 +115,50 @@ fi
 print_status "Note: Primary model codellama-trained-20250624_193347 will be downloaded during first use"
 print_status "Fallback model deepseek-coder-6.7b.bin is included in package for immediate offline operation"
 
-# Download Python wheels
-print_status "Downloading Python wheels..."
+# Download Python wheels for multiple Python versions
+print_status "Downloading Python wheels for multiple Python versions..."
+
+# Download for current Python version
+print_status "Downloading wheels for Python $PYTHON_VERSION..."
 pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
+
+# Download for Python 3.9 (common version)
+print_status "Downloading wheels for Python 3.9..."
+pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.9" --only-binary=:all: --no-deps
+
+# Download for Python 3.10 (common version)
+print_status "Downloading wheels for Python 3.10..."
+pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.10" --only-binary=:all: --no-deps
+
+# Download for Python 3.11 (common version)
+print_status "Downloading wheels for Python 3.11..."
+pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.11" --only-binary=:all: --no-deps
+
+# Download for Python 3.12 (common version)
+print_status "Downloading wheels for Python 3.12..."
+pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.12" --only-binary=:all: --no-deps
+
+# Download for Python 3.13 (latest version)
+print_status "Downloading wheels for Python 3.13..."
+pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.13" --only-binary=:all: --no-deps
 
 # Also download for x86_64 if on ARM, or vice versa
 if [ "$ARCH" = "arm64" ]; then
     print_status "Downloading x86_64 wheels for compatibility..."
     pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_10_9_x86_64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_10_9_x86_64 --python-version "3.9" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_10_9_x86_64 --python-version "3.10" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_10_9_x86_64 --python-version "3.11" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_10_9_x86_64 --python-version "3.12" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_10_9_x86_64 --python-version "3.13" --only-binary=:all: --no-deps
 elif [ "$ARCH" = "x86_64" ]; then
     print_status "Downloading ARM64 wheels for compatibility..."
     pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "$PYTHON_VERSION" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.9" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.10" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.11" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.12" --only-binary=:all: --no-deps
+    pip3 download -r requirements.txt -d "$PACKAGES_DIR" --platform macosx_11_0_arm64 --python-version "3.13" --only-binary=:all: --no-deps
 fi
 
 # Download static analysis tools (only those not already in bin/)

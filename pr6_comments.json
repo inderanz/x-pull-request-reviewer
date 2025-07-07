@@ -1,0 +1,209 @@
+[
+  {
+    "url": "https://api.github.com/repos/inderanz/testing-repo/pulls/comments/2173121560",
+    "pull_request_review_id": 2968361865,
+    "id": 2173121560,
+    "node_id": "PRRC_kwDOPAYS186BhzQY",
+    "diff_hunk": "@@ -0,0 +1,35 @@\n+# Final test file with multiple security issues\n+\n+import os\n+import subprocess\n+\n+def insecure_function():\n+    # SECURITY ISSUE: Hardcoded password\n+    password = \"admin123\"",
+    "path": "final_test.py",
+    "commit_id": "49c4742c53fb2f591f8485c30645cb3498821216",
+    "original_commit_id": "49c4742c53fb2f591f8485c30645cb3498821216",
+    "user": {
+      "login": "inderanz",
+      "id": 191028606,
+      "node_id": "U_kgDOC2Ldfg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/191028606?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/inderanz",
+      "html_url": "https://github.com/inderanz",
+      "followers_url": "https://api.github.com/users/inderanz/followers",
+      "following_url": "https://api.github.com/users/inderanz/following{/other_user}",
+      "gists_url": "https://api.github.com/users/inderanz/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/inderanz/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/inderanz/subscriptions",
+      "organizations_url": "https://api.github.com/users/inderanz/orgs",
+      "repos_url": "https://api.github.com/users/inderanz/repos",
+      "events_url": "https://api.github.com/users/inderanz/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/inderanz/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "🔍 SECURITY ISSUE: Hardcoded password detected on this line. Use environment variables instead.",
+    "created_at": "2025-06-28T04:43:46Z",
+    "updated_at": "2025-06-28T04:43:46Z",
+    "html_url": "https://github.com/inderanz/testing-repo/pull/6#discussion_r2173121560",
+    "pull_request_url": "https://api.github.com/repos/inderanz/testing-repo/pulls/6",
+    "author_association": "OWNER",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/inderanz/testing-repo/pulls/comments/2173121560"
+      },
+      "html": {
+        "href": "https://github.com/inderanz/testing-repo/pull/6#discussion_r2173121560"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/inderanz/testing-repo/pulls/6"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/inderanz/testing-repo/pulls/comments/2173121560/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": 8,
+    "original_line": 8,
+    "side": "RIGHT",
+    "original_position": 8,
+    "position": 8,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/inderanz/testing-repo/pulls/comments/2173121775",
+    "pull_request_review_id": 2968363268,
+    "id": 2173121775,
+    "node_id": "PRRC_kwDOPAYS186BhzTv",
+    "diff_hunk": "@@ -0,0 +1,35 @@\n+# Final test file with multiple security issues\n+\n+import os\n+import subprocess\n+\n+def insecure_function():\n+    # SECURITY ISSUE: Hardcoded password\n+    password = \"admin123\"\n+    \n+    # SECURITY ISSUE: Command injection vulnerability",
+    "path": "final_test.py",
+    "commit_id": "49c4742c53fb2f591f8485c30645cb3498821216",
+    "original_commit_id": "49c4742c53fb2f591f8485c30645cb3498821216",
+    "user": {
+      "login": "inderanz",
+      "id": 191028606,
+      "node_id": "U_kgDOC2Ldfg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/191028606?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/inderanz",
+      "html_url": "https://github.com/inderanz",
+      "followers_url": "https://api.github.com/users/inderanz/followers",
+      "following_url": "https://api.github.com/users/inderanz/following{/other_user}",
+      "gists_url": "https://api.github.com/users/inderanz/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/inderanz/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/inderanz/subscriptions",
+      "organizations_url": "https://api.github.com/users/inderanz/orgs",
+      "repos_url": "https://api.github.com/users/inderanz/repos",
+      "events_url": "https://api.github.com/users/inderanz/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/inderanz/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "🔍 AGENT DEBUG: Testing line comment from debug script",
+    "created_at": "2025-06-28T04:45:06Z",
+    "updated_at": "2025-06-28T04:45:06Z",
+    "html_url": "https://github.com/inderanz/testing-repo/pull/6#discussion_r2173121775",
+    "pull_request_url": "https://api.github.com/repos/inderanz/testing-repo/pulls/6",
+    "author_association": "OWNER",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/inderanz/testing-repo/pulls/comments/2173121775"
+      },
+      "html": {
+        "href": "https://github.com/inderanz/testing-repo/pull/6#discussion_r2173121775"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/inderanz/testing-repo/pulls/6"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/inderanz/testing-repo/pulls/comments/2173121775/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": 10,
+    "original_line": 10,
+    "side": "RIGHT",
+    "original_position": 10,
+    "position": 10,
+    "subject_type": "line"
+  },
+  {
+    "url": "https://api.github.com/repos/inderanz/testing-repo/pulls/comments/2173122034",
+    "pull_request_review_id": 2968364673,
+    "id": 2173122034,
+    "node_id": "PRRC_kwDOPAYS186BhzXy",
+    "diff_hunk": "@@ -0,0 +1,35 @@\n+# Final test file with multiple security issues\n+\n+import os\n+import subprocess\n+\n+def insecure_function():\n+    # SECURITY ISSUE: Hardcoded password\n+    password = \"admin123\"\n+    \n+    # SECURITY ISSUE: Command injection vulnerability",
+    "path": "final_test.py",
+    "commit_id": "49c4742c53fb2f591f8485c30645cb3498821216",
+    "original_commit_id": "49c4742c53fb2f591f8485c30645cb3498821216",
+    "user": {
+      "login": "inderanz",
+      "id": 191028606,
+      "node_id": "U_kgDOC2Ldfg",
+      "avatar_url": "https://avatars.githubusercontent.com/u/191028606?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/inderanz",
+      "html_url": "https://github.com/inderanz",
+      "followers_url": "https://api.github.com/users/inderanz/followers",
+      "following_url": "https://api.github.com/users/inderanz/following{/other_user}",
+      "gists_url": "https://api.github.com/users/inderanz/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/inderanz/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/inderanz/subscriptions",
+      "organizations_url": "https://api.github.com/users/inderanz/orgs",
+      "repos_url": "https://api.github.com/users/inderanz/repos",
+      "events_url": "https://api.github.com/users/inderanz/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/inderanz/received_events",
+      "type": "User",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "body": "🔍 AGENT DEBUG: Testing line comment from debug script",
+    "created_at": "2025-06-28T04:46:02Z",
+    "updated_at": "2025-06-28T04:46:02Z",
+    "html_url": "https://github.com/inderanz/testing-repo/pull/6#discussion_r2173122034",
+    "pull_request_url": "https://api.github.com/repos/inderanz/testing-repo/pulls/6",
+    "author_association": "OWNER",
+    "_links": {
+      "self": {
+        "href": "https://api.github.com/repos/inderanz/testing-repo/pulls/comments/2173122034"
+      },
+      "html": {
+        "href": "https://github.com/inderanz/testing-repo/pull/6#discussion_r2173122034"
+      },
+      "pull_request": {
+        "href": "https://api.github.com/repos/inderanz/testing-repo/pulls/6"
+      }
+    },
+    "reactions": {
+      "url": "https://api.github.com/repos/inderanz/testing-repo/pulls/comments/2173122034/reactions",
+      "total_count": 0,
+      "+1": 0,
+      "-1": 0,
+      "laugh": 0,
+      "hooray": 0,
+      "confused": 0,
+      "heart": 0,
+      "rocket": 0,
+      "eyes": 0
+    },
+    "start_line": null,
+    "original_start_line": null,
+    "start_side": null,
+    "line": 10,
+    "original_line": 10,
+    "side": "RIGHT",
+    "original_position": 10,
+    "position": 10,
+    "subject_type": "line"
+  }
+]

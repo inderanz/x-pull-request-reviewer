@@ -347,7 +347,7 @@ def log_audit(message):
         print(f"[AUDIT ERROR] Could not write to audit.log: {e}")
 
 
-def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch='main', pr_number=None, repo_slug=None, interactive=True, plugins=None, provider=None):
+def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch='main', pr_number=None, repo_slug=None, interactive=True, plugins=None, provider=None, filter_mode='added', context_lines=3):
     """
     Clone or use a local repo, fetch and checkout the branch, and get the diff.
     Optionally post the LLM review as a PR comment if pr_number and repo_slug are provided.
@@ -355,24 +355,31 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
     Only review, line comments, and summary are posted. No approve/merge or other actions are taken.
     """
     from ..github.pr_client import get_pr_metadata
+    # --- Robust PR URL handling ---
+    if repo_url and '/pull/' in repo_url:
+        # Extract repo_slug and pr_number if not provided
+        if not repo_slug or not pr_number:
+            import re
+            m = re.match(r'https://github.com/([^/]+/[^/]+)/pull/(\d+)', repo_url)
+            if m:
+                repo_slug = m.group(1)
+                pr_number = int(m.group(2))
+        # Extract actual repo URL
+        actual_repo_url = extract_repo_url_from_pr_url(repo_url)
+        if not actual_repo_url:
+            click.echo(f"Error: Could not extract repository URL from PR URL: {repo_url}")
+            return
+        repo_url = actual_repo_url
+        # Fetch PR metadata
+        pr_meta = get_pr_metadata(repo_slug, pr_number)
+        if not pr_meta:
+            click.echo(f"Error: Could not fetch PR metadata for {repo_slug}#{pr_number}")
+            return
+        base_branch = pr_meta['base_branch']
+        branch = pr_meta['head_branch']
+        click.echo(f"[INFO] PR base branch: {base_branch}, head branch: {branch}")
+    # --- End PR URL handling ---
     if repo_url:
-        # If it's a PR URL, extract the repository URL
-        if '/pull/' in repo_url and pr_number and repo_slug:
-            actual_repo_url = extract_repo_url_from_pr_url(repo_url)
-            if not actual_repo_url:
-                click.echo(f"Error: Could not extract repository URL from PR URL: {repo_url}")
-                return
-            click.echo(f"Extracted repository URL from PR: {actual_repo_url}")
-            repo_url = actual_repo_url
-            # Fetch PR metadata
-            pr_meta = get_pr_metadata(repo_slug, pr_number)
-            if not pr_meta:
-                click.echo(f"Error: Could not fetch PR metadata for {repo_slug}#{pr_number}")
-                return
-            base_branch = pr_meta['base_branch']
-            branch = pr_meta['head_branch']
-            click.echo(f"[INFO] PR base branch: {base_branch}, head branch: {branch}")
-        
         dest_dir = os.path.join('workspace', os.path.basename(repo_url.rstrip('/').replace('.git', '')))
         if not os.path.exists(dest_dir):
             git_utils.clone_repo(repo_url, dest_dir)
@@ -690,11 +697,11 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
     first_file = diff_lines[0][0] if diff_lines else None
     first_line = diff_lines[0][1] if diff_lines else 1
 
-    # Use intelligent line mapping instead of random cycling
-    mapped_comments = map_llm_comments_to_lines(all_line_comments, diff)
+    # Use intelligent line mapping with filter mode and context lines
+    mapped_comments = map_llm_comments_to_lines(all_line_comments, diff, filter_mode=filter_mode, context_lines=context_lines)
     
     # Log the mapping results for debugging
-    click.echo(f"\n[DEBUG] Line mapping results:")
+    click.echo(f"\n[DEBUG] Line mapping results (filter_mode={filter_mode}, context_lines={context_lines}):")
     click.echo(f"Original LLM comments: {len(all_line_comments)}")
     click.echo(f"Mapped comments: {len(mapped_comments)}")
     for i, (orig, mapped) in enumerate(zip(all_line_comments, mapped_comments)):
@@ -711,6 +718,12 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
                 result = post_line_comment(repo_slug, pr_number, comment, commit_sha, file_path, line_num)
                 click.echo(f"[POST] {result}")
                 log_audit(f"[POST] {result}")
+                if '[ERROR]' in result and '422' in result:
+                    click.echo(f"[ERROR] 422 Unprocessable Entity for payload: file={file_path}, line={line_num}, comment={comment}")
+                    click.echo("[ERROR] Fallback: Posting as general PR comment.")
+                    result2 = post_pr_comment(repo_slug, pr_number, comment)
+                    click.echo(f"[POST-FALLBACK] {result2}")
+                    log_audit(f"[POST-FALLBACK] {result2}")
             else:
                 # If no file, post as general PR comment
                 result = post_pr_comment(repo_slug, pr_number, comment)
@@ -769,85 +782,21 @@ def review_pr_or_branch(repo_url=None, repo_path=None, branch=None, base_branch=
 @click.option('--repo-slug', type=str, help='GitHub repo in org/repo format (for posting comments)')
 @click.option('--no-interactive', is_flag=True, help='Disable interactive change management (useful for CI/CD)')
 @click.option('--provider', type=click.Choice(['ollama', 'google_code_assist', 'gemini_cli']), help='LLM provider to use for the review')
-def review(pr_url, repo_path, branch, pr_number, repo_slug, no_interactive, provider):
-    """Review a pull request or branch. Optionally post LLM review as PR comment if --pr-number and --repo-slug are provided."""
-
-    # Handle PR URL and prompt for cloning
-    if pr_url and not repo_path:
-        repo_url = extract_repo_url_from_pr_url(pr_url)
-        if not repo_url:
-            click.echo(f"[ERROR] Could not extract repository URL from PR URL: {pr_url}")
-            sys.exit(1)
-        click.echo(f"[INFO] PR URL detected. Repository: {repo_url}")
-        resp = click.prompt("Do you want to clone the repository for this PR review? [Y/n]", default="Y")
-        if resp.strip().lower() in ["y", "yes", ""]:
-            # Clone the repo if not already present
-            dest_dir = os.path.join('workspace', os.path.basename(repo_url.rstrip('/').replace('.git', '')))
-            if not os.path.exists(dest_dir):
-                try:
-                    git_utils.clone_repo(repo_url, dest_dir)
-                except Exception as e:
-                    click.echo(f"[ERROR] Failed to clone repository: {e}")
-                    sys.exit(1)
-            repo_path = dest_dir
-            # Fetch PR metadata and checkout PR branch
-            from ..github.pr_client import get_pr_metadata
-            org_repo = repo_url.split('github.com/')[-1].replace('.git', '')
-            pr_number = int(pr_url.rstrip('/').split('/')[-1])
-            repo_slug = org_repo  # Set the repo_slug
-            pr_meta = get_pr_metadata(org_repo, pr_number)
-            if not pr_meta:
-                click.echo(f"[ERROR] Could not fetch PR metadata for {org_repo}#{pr_number}")
-                sys.exit(1)
-            base_branch = pr_meta['base_branch']
-            branch = pr_meta['head_branch']
-            click.echo(f"[INFO] PR base branch: {base_branch}, head branch: {branch}")
-        else:
-            repo_path = click.prompt("Enter the path to your local clone of the repository", type=str)
-            if not os.path.exists(repo_path):
-                click.echo(f"[ERROR] Provided path does not exist: {repo_path}")
-                sys.exit(1)
-
-    # LLM provider selection
-    from ..llm.unified_client import get_llm_client
-    client = get_llm_client()
-    available_providers = client.get_available_providers()
-    enabled_providers = [p for p, ok in available_providers.items() if ok]
-    if not provider:
-        if len(enabled_providers) == 0:
-            click.echo("[ERROR] No LLM providers are available. Please configure at least one provider.")
-            sys.exit(1)
-        elif len(enabled_providers) == 1:
-            provider = enabled_providers[0]
-            click.echo(f"[INFO] Only one LLM provider available: {provider}")
-        else:
-            click.echo("Multiple LLM providers detected:")
-            for idx, p in enumerate(enabled_providers, 1):
-                click.echo(f"  {idx}. {p}")
-            sel = click.prompt(f"Select provider [1-{len(enabled_providers)}]", type=int, default=1)
-            provider = enabled_providers[sel-1]
-    else:
-        if provider not in enabled_providers:
-            click.echo(f"[ERROR] Selected provider '{provider}' is not available. Available: {enabled_providers}")
-            sys.exit(1)
-
-    # Prompt for Gemini CLI key if needed
-    if provider == "gemini_cli":
-        from ..llm.credential_manager import get_credential_manager
-        cred_mgr = get_credential_manager()
-        if not cred_mgr.get_credential("gemini_cli", "api_key"):
-            click.echo("Gemini CLI API key not found.")
-            cred_mgr.prompt_for_credentials("gemini_cli")
-
-    # Run the review
+@click.option('--filter-mode', default='added', show_default=True, help='Filter mode for line comments (added, diff_context, file, nofilter)')
+@click.option('--context-lines', default=3, show_default=True, type=int, help='Number of context lines for diff_context mode')
+def review_pr_or_branch_cli(pr_url, repo_path, branch, pr_number, repo_slug, no_interactive, provider, filter_mode, context_lines):
+    """CLI entrypoint for review_pr_or_branch with backward compatibility."""
     review_pr_or_branch(
-        repo_url=None,  # Already handled
+        repo_url=pr_url,
         repo_path=repo_path,
         branch=branch,
-        base_branch=base_branch if 'base_branch' in locals() else 'main',
         pr_number=pr_number,
         repo_slug=repo_slug,
         interactive=not no_interactive,
-        plugins=None,
-        provider=provider
-    ) 
+        provider=provider,
+        filter_mode=filter_mode,
+        context_lines=context_lines
+    )
+
+# For CLI compatibility: expose as 'review' for xprr CLI
+review = review_pr_or_branch_cli 

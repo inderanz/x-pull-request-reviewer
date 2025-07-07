@@ -6,7 +6,7 @@ import os
 @patch('src.agent.main.get_latest_commit_sha', return_value='dummysha')
 @patch('src.agent.main.git_utils')
 @patch('src.agent.main.analyze_directory')
-@patch('src.agent.main.build_review_prompt')
+@patch('src.agent.main.build_enhanced_review_prompt')
 @patch('src.agent.main.query_llm_for_review')
 @patch('src.agent.main.post_pr_comment')
 @patch('src.agent.main.post_line_comment')
@@ -56,4 +56,35 @@ def test_review_pr_or_branch_missing_repo(mock_git):
     # Should print error and return
     with patch('click.echo') as mock_echo:
         main.review_pr_or_branch()
-        mock_echo.assert_any_call('Either repo_url or repo_path must be provided.') 
+        mock_echo.assert_any_call('Either repo_url or repo_path must be provided.')
+
+def test_map_llm_comments_to_lines_modes():
+    from src.agent.diff_utils import map_llm_comments_to_lines
+    diff = (
+        'diff --git a/foo.py b/foo.py\n'
+        'index 0000000..1111111 100644\n'
+        '--- a/foo.py\n'
+        '+++ b/foo.py\n'
+        '@@ -1,2 +1,4 @@\n'
+        '-print("bar")\n'
+        '+print("foo")\n'
+        '+print("baz")\n'
+        '+print("qux")\n'
+    )
+    # LLM comments: (file, line, comment)
+    comments = [('foo.py', 2, 'Good change'), (None, 3, 'Another line'), ('foo.py', 2, 3, 'Multi-line comment')]
+    # added mode
+    mapped = map_llm_comments_to_lines(comments, diff, filter_mode='added')
+    assert any(m[1] == 2 for m in mapped), 'added mode should map to added lines'
+    # diff_context mode
+    mapped = map_llm_comments_to_lines(comments, diff, filter_mode='diff_context', context_lines=1)
+    assert any(m[1] == 2 or m[1] == 3 for m in mapped), 'diff_context should allow context lines'
+    # file mode
+    mapped = map_llm_comments_to_lines(comments, diff, filter_mode='file')
+    assert all(m[0] == 'foo.py' for m in mapped if m[0]), 'file mode should allow any line in file'
+    # nofilter mode
+    mapped = map_llm_comments_to_lines(comments, diff, filter_mode='nofilter')
+    assert any(m[0] == 'foo.py' for m in mapped), 'nofilter should allow any file/line'
+    # multi-line
+    multi = [c for c in mapped if isinstance(c[1], int) and c[1] == 2]
+    assert multi, 'multi-line comment should be mapped' 

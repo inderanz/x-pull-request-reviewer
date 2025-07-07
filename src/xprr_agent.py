@@ -257,65 +257,22 @@ def start():
 @click.option('--pr-number', type=int, help='Pull request number (for posting comments)')
 @click.option('--repo-slug', help='GitHub repo in org/repo format (for posting comments)')
 @click.option('--no-interactive', is_flag=True, help='Disable interactive change management (useful for CI/CD)')
-@click.option('--provider', type=click.Choice(['ollama', 'google_code_assist', 'gemini_cli']), 
-              help='LLM provider to use for the review')
-def review(pr_url, repo, branch, pr_number, repo_slug, no_interactive, provider):
-    """Review a pull request or branch. Optionally post LLM review as PR comment if --pr-number and --repo-slug are provided.
-    
-    The review now includes interactive change management where you can:
-    - Apply specific suggested changes
-    - Revert applied changes if needed
-    - Selectively ignore certain recommendations
-
-    Required GitHub token scopes: repo (for private repos), public_repo (for public repos), and write:discussion for comments.
-    """
-    interactive = not no_interactive
-    plugins = load_plugins()
-    
-    # Enhanced Gemini CLI authentication check and setup
-    if provider == "gemini_cli" or (not provider and check_gemini_auth()):
-        if not check_gemini_auth():
-            print("\n🔐 Gemini CLI Authentication Required")
-            print("XPRR uses Gemini CLI for code reviews and requires authentication.")
-            setup_choice = input("Would you like to set up authentication now? (y/n): ").strip().lower()
-            if setup_choice in ['y', 'yes']:
-                if not setup_gemini_auth():
-                    print("Authentication setup failed. Please run 'xprr llm setup-provider --provider gemini_cli' to try again.")
-                    return
-            else:
-                print("Authentication required for Gemini CLI. Please run 'xprr llm setup-provider --provider gemini_cli' when ready.")
-                return
-    
-    # Set up provider if specified
-    if provider:
-        from .llm.unified_client import get_llm_client
-        client = get_llm_client(provider=provider)
-        if not client.switch_provider(provider):
-            log_audit(f"[ERROR] Failed to switch to provider: {provider}")
-            print(f"[ERROR] Failed to switch to provider: {provider}")
-            return
-    
-    try:
-        log_audit(f"[REVIEW] Starting review: pr_url={pr_url}, repo={repo}, branch={branch}, pr_number={pr_number}, repo_slug={repo_slug}, provider={provider or 'default'}")
-        
-        # Import the main review function that handles PR URLs properly
-        from .agent.main import review as main_review
-        
-        # Call the main review function which handles PR URL parsing
-        main_review.callback(
-            pr_url=pr_url,
-            repo_path=repo,
-            branch=branch,
-            pr_number=pr_number,
-            repo_slug=repo_slug,
-            no_interactive=no_interactive,
-            provider=provider
-        )
-        
-        log_audit(f"[REVIEW] Completed review: pr_url={pr_url}, repo={repo}, branch={branch}, pr_number={pr_number}, repo_slug={repo_slug}")
-    except Exception as e:
-        log_audit(f"[ERROR] Review failed: {e}")
-        print(f"[ERROR] Review failed: {e}")
+@click.option('--provider', type=click.Choice(['ollama', 'google_code_assist', 'gemini_cli']), help='LLM provider to use for the review')
+@click.option('--filter-mode', default='added', show_default=True, help='Filter mode for line comments (added, diff_context, file, nofilter)')
+@click.option('--context-lines', default=3, show_default=True, type=int, help='Number of context lines for diff_context mode')
+def review(pr_url, repo, branch, pr_number, repo_slug, no_interactive, provider, filter_mode, context_lines):
+    """Review a pull request or branch. Optionally post LLM review as PR comment if --pr-number and --repo-slug are provided."""
+    review_pr_or_branch(
+        repo_url=pr_url,
+        repo_path=repo,
+        branch=branch,
+        pr_number=pr_number,
+        repo_slug=repo_slug,
+        interactive=not no_interactive,
+        provider=provider,
+        filter_mode=filter_mode,
+        context_lines=context_lines
+    )
 
 @cli.command()
 def config():

@@ -109,35 +109,106 @@ def create_line_numbered_diff(diff):
     return "\n".join(numbered_diff)
 
 
-def map_llm_comments_to_lines(llm_comments, diff):
+def map_llm_comments_to_lines(llm_comments, diff, filter_mode='added', context_lines=3):
     """
-    Intelligently map LLM comments to actual diff lines based on line numbers and content.
-    
-    Args:
-        llm_comments: List of (file_path, line_num, comment) tuples from LLM
-        diff: The original diff string
-    
-    Returns:
-        List of (file_path, line_num, comment) tuples with corrected line numbers
+    Map LLM comments to valid (file_path, line_number) pairs for added lines in the diff.
+    Supports filter modes: 'added', 'diff_context', 'file', 'nofilter'.
+    Supports multi-line (range) comments if LLM provides (file, start_line, end_line, comment).
+    If a comment cannot be mapped, return (None, None, comment) so it can be posted as a general comment.
     """
-    parsed_diff = parse_unified_diff(diff)
-    
-    if not parsed_diff:
-        return llm_comments
-    
-    # Get the file path from the diff
-    file_path = parsed_diff[0][0] if parsed_diff else None
-    
+    # Parse the diff for added lines and context
+    parsed_diff = parse_unified_diff_with_context(diff)
+    added_lines = set()
+    context_lines_set = set()
+    file_lines = {}
+    all_files = set()
+    for item in parsed_diff:
+        file_path = item['file']
+        all_files.add(file_path)
+        if file_path not in file_lines:
+            file_lines[file_path] = set()
+        file_lines[file_path].add(item['line_number'])
+        if item['type'] == 'added':
+            added_lines.add((file_path, item['line_number']))
+            # For diff_context mode, add context lines
+            idx = parsed_diff.index(item)
+            for offset in range(-context_lines, context_lines+1):
+                ctx_idx = idx + offset
+                if 0 <= ctx_idx < len(parsed_diff):
+                    ctx_item = parsed_diff[ctx_idx]
+                    context_lines_set.add((ctx_item['file'], ctx_item['line_number']))
+
     mapped_comments = []
-    
-    for orig_file, orig_line, comment in llm_comments:
-        # If the LLM provided a reasonable line number, preserve it
-        if orig_line and 1 <= orig_line <= 1000:
-            mapped_comments.append((file_path, orig_line, comment))
+    for comment_tuple in llm_comments:
+        # Support both (file, line, comment) and (file, start_line, end_line, comment)
+        if len(comment_tuple) == 4:
+            orig_file, start_line, end_line, comment = comment_tuple
+            line_range = range(start_line, end_line+1) if start_line and end_line else []
         else:
-            # Only apply fallback for clearly wrong line numbers
-            mapped_comments.append((file_path, 1, comment))
-    
+            orig_file, orig_line, comment = comment_tuple
+            line_range = [orig_line] if orig_line else []
+
+        mapped = False
+        # Try to map based on filter_mode
+        if filter_mode == 'added':
+            for line in line_range:
+                if orig_file and (orig_file, line) in added_lines:
+                    mapped_comments.append((orig_file, line, comment))
+                    mapped = True
+                    break
+                elif not orig_file:
+                    # Try to find any file with this added line
+                    for file_path, lnum in added_lines:
+                        if lnum == line:
+                            mapped_comments.append((file_path, lnum, comment))
+                            mapped = True
+                            break
+                if mapped:
+                    break
+        elif filter_mode == 'diff_context':
+            for line in line_range:
+                if orig_file and (orig_file, line) in context_lines_set:
+                    mapped_comments.append((orig_file, line, comment))
+                    mapped = True
+                    break
+                elif not orig_file:
+                    for file_path, lnum in context_lines_set:
+                        if lnum == line:
+                            mapped_comments.append((file_path, lnum, comment))
+                            mapped = True
+                            break
+                if mapped:
+                    break
+        elif filter_mode == 'file':
+            for line in line_range:
+                if orig_file and orig_file in file_lines and line in file_lines[orig_file]:
+                    mapped_comments.append((orig_file, line, comment))
+                    mapped = True
+                    break
+                elif not orig_file:
+                    for file_path in file_lines:
+                        if line in file_lines[file_path]:
+                            mapped_comments.append((file_path, line, comment))
+                            mapped = True
+                            break
+                if mapped:
+                    break
+        elif filter_mode == 'nofilter':
+            # Allow any file/line
+            for line in line_range:
+                if orig_file:
+                    mapped_comments.append((orig_file, line, comment))
+                    mapped = True
+                    break
+                elif not orig_file:
+                    for file_path in all_files:
+                        mapped_comments.append((file_path, line, comment))
+                        mapped = True
+                        break
+                if mapped:
+                    break
+        if not mapped:
+            mapped_comments.append((None, None, comment))
     return mapped_comments
 
 

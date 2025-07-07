@@ -73,7 +73,13 @@ def post_line_comment(repo, pr_number, body, commit_id, path, line):
     }
     try:
         resp = requests.post(url, headers=headers, json=payload, timeout=30)
+        if resp.status_code == 422:
+            print(f"[ERROR] 422 Unprocessable Entity when posting line comment. Payload: {payload}")
+            print(f"[ERROR] Response: {resp.text}")
+            return f"[ERROR] Failed to post line comment: 422 {resp.text}"
         resp.raise_for_status()
         return f"[INFO] Line comment posted to {path} line {line} in PR #{pr_number}."
     except Exception as e:
+        print(f"[ERROR] Exception posting line comment. Payload: {payload}")
+        print(f"[ERROR] Exception: {e}")
         return f"[ERROR] Failed to post line comment: {e}" 
