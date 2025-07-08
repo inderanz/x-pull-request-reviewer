@@ -6,7 +6,7 @@ import platform
 MISSING_PACKAGES = [
     'jaraco.functools',
     'MarkupSafe',
-    'pydantic-core',
+    'pydantic-core==2.33.2',
     'pyyaml',
 ]
 

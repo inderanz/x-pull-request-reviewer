@@ -323,7 +323,7 @@ setup_ollama() {
         else
             print_status "Loading DeepSeek Coder model..."
             if [ -f "ollama_models/deepseek-coder-6.7b.bin" ]; then
-                ollama create deepseek-coder -f ollama_models/deepseek-coder-6.7b.bin
+                ollama import ollama_models/deepseek-coder-6.7b.bin
                 print_success "DeepSeek Coder model loaded from offline package"
             else
                 print_warning "Model file not found. Will download during first use"
