@@ -1,0 +1,6 @@
+#!/bin/bash
+# Gemini CLI Setup Script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/venv/bin/activate"
+export PATH="$SCRIPT_DIR/bin:$PATH"
+python -m src.xprr_agent setup-gemini
