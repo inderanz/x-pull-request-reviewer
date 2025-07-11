@@ -1,0 +1,9 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="120" height="120" rx="24" fill="#232946"/>
+  <circle cx="60" cy="60" r="36" fill="#F4D35E"/>
+  <rect x="40" y="50" width="40" height="20" rx="10" fill="#232946"/>
+  <circle cx="50" cy="60" r="4" fill="#F4D35E"/>
+  <circle cx="70" cy="60" r="4" fill="#F4D35E"/>
+  <rect x="54" y="70" width="12" height="4" rx="2" fill="#F4D35E"/>
+  <text x="60" y="110" text-anchor="middle" fill="#F4D35E" font-size="14" font-family="Arial" font-weight="bold">PRR</text>
+</svg> 
